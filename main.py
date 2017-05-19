@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from SearchEngine import SearchEngine
 
 if __name__ == "__main__":

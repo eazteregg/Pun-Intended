@@ -12,11 +12,11 @@ class SearchEngine():
         self.d_of_comparisons = d_of_comparisons  # max dimensionality of the two lists
         self.n_of_results = n_of_results  # how many resutlts the search engine is supposed to outpu
         self.combine = combine  # later to be implemented as choice between combination operations
-        self.word_vectors = kv.load_word2vec_format('Pun-Intended_Resources\\word2vec.6B.100d.txt')  # retrieve word vectors from file
+        self.word_vectors = kv.load_word2vec_format('data/glove.6B.100d.txt')  # retrieve word vectors from file
         self.phondict = dict()
 
         # Fill the phonetic dictionary
-        with open('Pun-Intended_Resources\\cmudict-0.7b') as phondict:
+        with open('data/cmudict-0.7b.utf8') as phondict:
             for line in phondict:
                 if line[:3] == ";;;":
                     continue
