@@ -2,8 +2,9 @@
 
 import argparse
 from SearchEngine import SearchEngine
-import sys
+
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser(
         description='Helps you build puns and lyrics')
     parser.add_argument('--vecs', type=str, default="glove.6B.100d.txt", help="Path to Glove/word2vec file (default: %(default)s)")
@@ -12,11 +13,11 @@ if __name__ == "__main__":
     cmd_args = parser.parse_args()
 
     print("Hello and welcome to the pun aid!")
-    se = SearchEngine(1000, sys.argv[1], combine='s')
+    se = SearchEngine(1000, cmd_args.vecs, combine='s')
 
     while True:
 
-        query = input("\"Sounds like x\" \"Has to do with y\"")
+        query = input("Start search: \"Sounds like x\" \"Has to do with y\" -OR- Change combination method: -s (Summation) or -p (Multiplication) or -i (List intersection):  ")
         query = query.split()
 
         if not query:
