@@ -33,13 +33,13 @@ class SearchEngine():
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', vectorfile), binary=binary)  # retrieve word vectors from file
 
             if not binary:
-                create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n")
+                create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n ")
 
         except ValueError as v:
             print(v)
             print("Converting gloVe to word2vec format.-------------")
 
-            create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n")
+            create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n ")
 
             gensim.scripts.glove2word2vec.glove2word2vec(os.path.join('data', vectorfile), os.path.join('data', 'word2vec.' + vectorfile))
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile))
