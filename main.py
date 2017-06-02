@@ -8,6 +8,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Helps you build puns and lyrics')
     parser.add_argument('--vecs', type=str, default="glove.6B.100d.txt", help="Path to Glove/word2vec file (default: %(default)s)")
+    parser.add_argument('--combo', type=str, default="sum", help="Combination method {sum|prod|inter} (default: %(default)s)")
     parser.add_argument('--rhyme', action="store_true", help="Restrict phonological matches to rhymes")
     parser.add_argument('--ortho', action="store_true", help="Use orthographic matches instead of phonological ones")
     cmd_args = parser.parse_args()
@@ -37,5 +38,4 @@ if __name__ == "__main__":
                 print('To change combination method please use: -i -p -s ')
                 continue
         else:
-
             print(se.execute_query(query[0], query[1]))
