@@ -11,6 +11,8 @@ if __name__ == "__main__":
     parser.add_argument('--combo', type=str, default="sum", help="Combination method {sum|prod|inter} (default: %(default)s)")
     parser.add_argument('--rhyme', action="store_true", help="Restrict phonological matches to rhymes")
     parser.add_argument('--ortho', action="store_true", help="Use orthographic matches instead of phonological ones")
+    parser.add_argument('--sound_like', type=str, help="Specify 'sounds-like' word")
+    parser.add_argument('--means', type=str, help="Specify 'meaning' word")
     cmd_args = parser.parse_args()
 
     print("Hello and welcome to the pun aid!")
