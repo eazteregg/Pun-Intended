@@ -86,10 +86,10 @@ class SearchEngine():
         # raise ValueError("listA must have the same length as listB!") # ...required
 
         fn_combo = None
-        if self.combine == 's':
+        if self.combine == 'sum':
             fn_combo = lambda m, n: m+n
 
-        elif self.combine == 'p':
+        elif self.combine == 'prod':
             fn_combo = lambda m, n: (m+1)*(n+1) # If either number is 0, the calculation is senseless
 
         if fn_combo:        #If either summation or multiplication has been chosen as combination method
@@ -106,8 +106,7 @@ class SearchEngine():
                 except KeyError:
                     resdict[phonlist[y]] = 100000000 + y
 
-        else:               #If nothing has been chosen -> default to intersection
-
+        elif self.combine == 'inter':
             return [x for x in ass_list if x in phonlist]
 
         reslist = []
