@@ -1,7 +1,6 @@
 import gensim.scripts.glove2word2vec
 from levenshtein import levenshtein
 from gensim.models.keyedvectors import KeyedVectors as kv
-import sys
 import os
 
 
@@ -19,7 +18,7 @@ class SearchEngine():
         create_bin = 'n'
 
         try:
-            if sys.argv[1][-4:] == ".bin":
+            if vectorfile[-4:] == ".bin":
                 binary = True
             else:
                 for filename in os.listdir('data'):
@@ -33,13 +32,13 @@ class SearchEngine():
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', vectorfile), binary=binary)  # retrieve word vectors from file
 
             if not binary:
-                create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n")
+                create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
 
         except ValueError as v:
             print(v)
             print("Converting gloVe to word2vec format.-------------")
 
-            create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n")
+            create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
 
             gensim.scripts.glove2word2vec.glove2word2vec(os.path.join('data', vectorfile), os.path.join('data', 'word2vec.' + vectorfile))
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile))
