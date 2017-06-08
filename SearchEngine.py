@@ -1,7 +1,9 @@
-import gensim.scripts.glove2word2vec
-from levenshtein import levenshtein
-from gensim.models.keyedvectors import KeyedVectors as kv
 import os
+
+import gensim.scripts.glove2word2vec
+from gensim.models.keyedvectors import KeyedVectors as kv
+from nltk.corpus import cmudict
+from nltk.metrics.distance import edit_distance
 
 
 class SearchEngine():
@@ -10,10 +12,11 @@ class SearchEngine():
     def __init__(self, d_of_comparisons, vectorfile, n_of_results=5, combine='s'):
 
         self.d_of_comparisons = d_of_comparisons  # max dimensionality of the two lists
-        self.n_of_results = n_of_results  # how many resutlts the search engine is supposed to output
+        self.n_of_results = n_of_results  # how many results the search engine is supposed to output
         self.combine = combine  # later to be implemented as choice between combination operations
+        self.phondict = cmudict.dict()  # CMU Pronouncing Dictionary
 
-        #If vector file in gloVe format, tranfsorm it into word2vec and provides option to store it as binary
+        # If vector file in gloVe format, transform it into word2vec and provides option to store it as binary
 
         create_bin = 'n'
 
@@ -46,18 +49,6 @@ class SearchEngine():
         if create_bin == 'y':
             self.word_vectors.save_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile[:-4] + '.bin'), binary=True)
 
-        self.phondict = dict()
-
-        # Fill the phonetic dictionary
-        with open(os.path.join('data', 'cmudict-0.7b.utf8')) as phondict:
-            for line in phondict:
-                if line[:3] == ";;;":   #skip the first couple of lines
-                    continue
-
-                line = line.split(maxsplit=1)
-                #print(line[0], line[1])
-                self.phondict[line[0].lower()] = line[1]
-
     def get_phon_list(self, word, max_dist):
         """Returns a list of phonetically similar words to word with max levenshtein distance of max_dist"""
         try:
@@ -68,7 +59,7 @@ class SearchEngine():
 
         results = []
         for x in self.phondict:
-            lvdist = levenshtein(self.phondict[x].split(), phon_rep.split())
+            lvdist = edit_distance(self.phondict[x], phon_rep)
 
             if lvdist <= max_dist:
                 results.append((x, lvdist))
