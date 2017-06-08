@@ -52,14 +52,16 @@ class SearchEngine():
     def get_phon_list(self, word, max_dist):
         """Returns a list of phonetically similar words to word with max levenshtein distance of max_dist"""
         try:
-            phon_rep = self.phondict[word]
 
+            phon_rep = self.phondict[word][0]  # CMU dict returns a list of pronunciations, thus [0]
+            print(phon_rep)
         except KeyError:
             print("Word not found in data bank!")
 
         results = []
         for x in self.phondict:
-            lvdist = edit_distance(self.phondict[x], phon_rep)
+            pron_x = self.phondict[x][0]
+            lvdist = edit_distance(pron_x, phon_rep)
 
             if lvdist <= max_dist:
                 results.append((x, lvdist))
@@ -72,32 +74,32 @@ class SearchEngine():
         """Combines the associative list with the phonetic list. To be implemented: fn_combo which steers the 
         combination operation"""
 
-        # if len(ass_list) != len(phonlist):                            # The way this is implemented, this is not...
-
-        # raise ValueError("listA must have the same length as listB!") # ...required
-
         fn_combo = None
         if self.combine == 'sum':
             fn_combo = lambda m, n: m+n
 
         elif self.combine == 'prod':
-            fn_combo = lambda m, n: (m+1)*(n+1) # If either number is 0, the calculation is senseless
+            fn_combo = lambda m, n: (m+1)*(n+1)  # If either number is 0, the calculation is senseless
 
-        if fn_combo:        #If either summation or multiplication has been chosen as combination method
+        if fn_combo:        # If either summation or multiplication has been chosen as combination method
 
             resdict = dict()
+
             for x in range(len(ass_list)):
-                if ass_list[x] in phonlist:
+
+                if ass_list[x] in phonlist:  # If a word is in ass_list and phonlist initialize its value with x
                     resdict[ass_list[x]] = x
-                else:
+                else:                        # Otherwise it shouldn't be considered -> add a huge number!
                     resdict[ass_list[x]] = 100000000 + x
+
             for y in range(len(phonlist)):
-                try:
+
+                try:                # Now for all words in phonlist combine their place with whats already in resdict
                     resdict[phonlist[y]] = fn_combo(resdict[phonlist[y]], y)
-                except KeyError:
+                except KeyError:    # If it is not already in resdict, it shouldn't be considered -> add a huge number!
                     resdict[phonlist[y]] = 100000000 + y
 
-        elif self.combine == 'inter':
+        elif self.combine == 'inter':  # simply return the intersection of both lists
             return [x for x in ass_list if x in phonlist]
 
         reslist = []
