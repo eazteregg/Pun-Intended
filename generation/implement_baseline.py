@@ -5,7 +5,14 @@ Created on Thu May 25 19:55:45 2017
 @author: Maximilian
 """
 import argparse
+import os
 from nltk.metrics.distance import edit_distance
+
+# Get file paths to previously learned sentences and the function word list.
+path_to_this_file = os.path.abspath(__file__) # i.e. /path/to/dir/implement_baseline.py
+script_dir = os.path.split(path_to_this_file)[0] #i.e. /path/to/dir/
+rel_path = "data/idiom_corpus_small.txt"
+abs_corpus_path = os.path.join(script_dir, rel_path)
 
 MAX_DISTANCE = 2  # Max edit distance to consider when exchanging words.
 
@@ -31,7 +38,7 @@ corpus = []  # 310
 corpus_idioms = []  # Idioms only (155)
 corpus_explanations = []  # Explanations only (155)
 
-with open('data/idiom_corpus_small.txt', 'r') as corpus:
+with open(abs_corpus_path, 'r') as corpus:
     corpus = [line.strip() for line in corpus if not line.startswith('#')]
 
 corpus_idioms = corpus[0::2]
