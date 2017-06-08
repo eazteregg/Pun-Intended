@@ -79,7 +79,7 @@ class SearchEngine():
             fn_combo = lambda m, n: m+n
 
         elif self.combine == 'prod':
-            fn_combo = lambda m, n: (m+1)*(n+1)  # If either number is 0, the calculation is senseless
+            fn_combo = lambda m, n: (m+1)*(n+1) # If either number is 0, the calculation is senseless
 
         if fn_combo:        # If either summation or multiplication has been chosen as combination method
 
