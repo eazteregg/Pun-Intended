@@ -1,9 +1,12 @@
+import os
+
 import gensim.scripts.glove2word2vec
-from levenshtein import levenshtein
 from gensim.models.keyedvectors import KeyedVectors as kv
 import os
 import g2pwrapper as g2p
 
+from nltk.corpus import cmudict
+from nltk.metrics.distance import edit_distance
 
 
 class SearchEngine():
@@ -12,11 +15,12 @@ class SearchEngine():
     def __init__(self, d_of_comparisons, vectorfile, n_of_results=5, combine='s'):
 
         self.d_of_comparisons = d_of_comparisons  # max dimensionality of the two lists
-        self.n_of_results = n_of_results  # how many resutlts the search engine is supposed to output
+        self.n_of_results = n_of_results  # how many results the search engine is supposed to output
         self.combine = combine  # later to be implemented as choice between combination operations
         self.g2p = g2p.G2PWrapper('cmudict-model6', g2p.PATH_G2P)
+        self.phondict = cmudict.dict()  # CMU Pronouncing Dictionary
 
-        #If vector file in gloVe format, tranfsorm it into word2vec and provides option to store it as binary
+        # If vector file in gloVe format, transform it into word2vec and provides option to store it as binary
 
         create_bin = 'n'
 
@@ -49,23 +53,12 @@ class SearchEngine():
         if create_bin == 'y':
             self.word_vectors.save_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile[:-4] + '.bin'), binary=True)
 
-        self.phondict = dict()
-
-        # Fill the phonetic dictionary
-        with open(os.path.join('data', 'cmudict-0.7b.utf8')) as phondict:
-            for line in phondict:
-                if line[:3] == ";;;":   #skip the first couple of lines
-                    continue
-
-                line = line.split(maxsplit=1)
-                #print(line[0], line[1])
-                self.phondict[line[0].lower()] = line[1]
-
     def get_phon_list(self, word, max_dist):
         """Returns a list of phonetically similar words to word with max levenshtein distance of max_dist"""
         try:
-            phon_rep = self.phondict[word]
 
+            phon_rep = self.phondict[word][0]  # CMU dict returns a list of pronunciations, thus [0]
+            print(phon_rep)
         except KeyError:
 
             try:
@@ -77,7 +70,8 @@ class SearchEngine():
 
         results = []
         for x in self.phondict:
-            lvdist = levenshtein(self.phondict[x].split(), phon_rep.split())
+            pron_x = self.phondict[x][0]
+            lvdist = edit_distance(pron_x, phon_rep)
 
             if lvdist <= max_dist:
                 results.append((x, lvdist))
@@ -90,10 +84,6 @@ class SearchEngine():
         """Combines the associative list with the phonetic list. To be implemented: fn_combo which steers the 
         combination operation"""
 
-        # if len(ass_list) != len(phonlist):                            # The way this is implemented, this is not...
-
-        # raise ValueError("listA must have the same length as listB!") # ...required
-
         fn_combo = None
         if self.combine == 'sum':
             fn_combo = lambda m, n: m+n
@@ -101,21 +91,25 @@ class SearchEngine():
         elif self.combine == 'prod':
             fn_combo = lambda m, n: (m+1)*(n+1) # If either number is 0, the calculation is senseless
 
-        if fn_combo:        #If either summation or multiplication has been chosen as combination method
+        if fn_combo:        # If either summation or multiplication has been chosen as combination method
 
             resdict = dict()
+
             for x in range(len(ass_list)):
-                if ass_list[x] in phonlist:
+
+                if ass_list[x] in phonlist:  # If a word is in ass_list and phonlist initialize its value with x
                     resdict[ass_list[x]] = x
-                else:
+                else:                        # Otherwise it shouldn't be considered -> add a huge number!
                     resdict[ass_list[x]] = 100000000 + x
+
             for y in range(len(phonlist)):
-                try:
+
+                try:                # Now for all words in phonlist combine their place with whats already in resdict
                     resdict[phonlist[y]] = fn_combo(resdict[phonlist[y]], y)
-                except KeyError:
+                except KeyError:    # If it is not already in resdict, it shouldn't be considered -> add a huge number!
                     resdict[phonlist[y]] = 100000000 + y
 
-        elif self.combine == 'inter':
+        elif self.combine == 'inter':  # simply return the intersection of both lists
             return [x for x in ass_list if x in phonlist]
 
         reslist = []

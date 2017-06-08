@@ -3,6 +3,8 @@ An application designed to help users find puns.
 
 Notes on how to get the program to work:
 
+Now needs nltk with cmudict!
+
 1.
 Get gensim running which requires some workarounds on windows as you'll be needing numpy+mkl and scipy which can be found
 on http://www.lfd.uci.edu/~gohlke/pythonlibs/
