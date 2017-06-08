@@ -2,6 +2,8 @@ import gensim.scripts.glove2word2vec
 from levenshtein import levenshtein
 from gensim.models.keyedvectors import KeyedVectors as kv
 import os
+import g2pwrapper as g2p
+
 
 
 class SearchEngine():
@@ -12,6 +14,7 @@ class SearchEngine():
         self.d_of_comparisons = d_of_comparisons  # max dimensionality of the two lists
         self.n_of_results = n_of_results  # how many resutlts the search engine is supposed to output
         self.combine = combine  # later to be implemented as choice between combination operations
+        self.g2p = g2p.G2PWrapper('cmudict-model6', g2p.PATH_G2P)
 
         #If vector file in gloVe format, tranfsorm it into word2vec and provides option to store it as binary
 
@@ -64,7 +67,13 @@ class SearchEngine():
             phon_rep = self.phondict[word]
 
         except KeyError:
-            print("Word not found in data bank!")
+
+            try:
+                phon_rep = self.g2p.transcribeWord(word)
+
+            except Exception:
+
+                print("Word not found in data bank!")
 
         results = []
         for x in self.phondict:
