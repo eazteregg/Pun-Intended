@@ -3,6 +3,7 @@ import os
 import gensim.scripts.glove2word2vec
 from gensim.models.keyedvectors import KeyedVectors as kv
 try:
+    import pronouncing
     from nltk.corpus import cmudict
     from nltk.metrics.distance import edit_distance
 except ImportError:
@@ -53,10 +54,12 @@ class SearchEngine():
         if create_bin == 'y':
             self.word_vectors.save_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile[:-4] + '.bin'), binary=True)
 
-    def get_phon_list(self, word, max_dist, ortho=None):
+    def get_phon_list(self, word, max_dist, ortho=None, rhyme=None):
         """Returns a list of phonetically similar words to word with max levenshtein distance of max_dist. If ortho is not
         None, the function will instead return a list of orthographically similar words."""
-        if not ortho:
+
+
+        if not ortho and not rhyme:
             iterlist = self.phondict
             try:
 
@@ -65,24 +68,29 @@ class SearchEngine():
             except KeyError:
                 print("Word not found in data bank!")
 
-        else:
+        elif ortho:
             iterlist = self.phondict.keys()
 
-        results = []
-        for x in iterlist:
+        if not rhyme:
+            results = []
+            for x in iterlist:
 
-            if not ortho:
-                pron_x = iterlist[x][0]
-                lvdist = edit_distance(pron_x, phon_rep)
+                if not ortho:
+                    pron_x = iterlist[x][0]
+                    lvdist = edit_distance(pron_x, phon_rep)
 
-            else:
-                lvdist = edit_distance(x, word)
+                else:
+                    lvdist = edit_distance(x, word)
 
-            if lvdist <= max_dist:
-                results.append((x, lvdist))
+                if lvdist <= max_dist:
+                    results.append((x, lvdist))
 
-        results.sort(key=lambda x: x[1])
-        return [x[0] for x in results[:self.d_of_comparisons]]
+            results.sort(key=lambda x: x[1])
+            return [x[0] for x in results[:self.d_of_comparisons]]
+
+        else:
+            results = pronouncing.rhymes(word)
+            return results[:self.d_of_comparisons]
 
     def combines(self, ass_list, phonlist):
 
@@ -129,12 +137,12 @@ class SearchEngine():
         return reslist[:self.n_of_results]
         # return [x[0] for x in reslist[:self.n_of_results]]
 
-    def execute_query(self, soundslike, association, ortho):
+    def execute_query(self, soundslike, association, ortho, rhyme):
 
         ass_list = [x[0] for x in
                     self.word_vectors.most_similar(positive=[association], topn=self.d_of_comparisons)]
 
-        phon_list = self.get_phon_list(soundslike, 2, ortho)
+        phon_list = self.get_phon_list(soundslike, 2, ortho, rhyme)
 
         return self.combines(ass_list, phon_list)
 

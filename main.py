@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import sys
 import argparse
 from SearchEngine import SearchEngine
 
@@ -19,6 +19,10 @@ if __name__ == "__main__":
     se = SearchEngine(1000, cmd_args.vecs, cmd_args.combo)
     print(cmd_args.ortho)
 
+    if cmd_args.ortho and cmd_args.rhyme:
+        print('Looking for both orthographic matches and rhyming matches is not possible. Please choose one!')
+        sys.exit()
+
     while True:
 
         query = input("Start search: \"Sounds like x\" \"Has to do with y\":\n> ")
@@ -31,4 +35,5 @@ if __name__ == "__main__":
             print("Sorry, you need to provide two arguments!")
             continue
         else:
-            print(se.execute_query(query[0], query[1], cmd_args.ortho))
+
+            print(se.execute_query(query[0], query[1], cmd_args.ortho, cmd_args.rhyme))
