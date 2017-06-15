@@ -42,7 +42,7 @@ class FindRelatedSentences():
     abs_corpus_path = os.path.join(script_dir, rel_path) #  C:.../Pun-Intended/generation/data
     bin_file_name = "word2vec.glove.6B.100d.bin"
 
-    abs_binary_path = os.path.join(script_dir, "..", "data", bin_file_name)
+    abs_binary_path = os.path.join(script_dir, "data", bin_file_name)
 
     with open(abs_corpus_path, 'r') as corpus:
         corpus = [line.strip().lower() for line in corpus if not line.startswith('#')]
