@@ -24,6 +24,7 @@ class SearchEngine():
         self.n_of_results = n_of_results  # how many results the search engine is supposed to output
         self.combine = combine  # later to be implemented as choice between combination operations
         self.phondict = cmudict.dict()  # CMU Pronouncing Dictionary
+        self.best_result = "no result" # Best word. big word. punny word.
 
         # If vector file in gloVe format, transform it into word2vec and provides option to store it as binary
 
@@ -136,6 +137,8 @@ class SearchEngine():
 
         reslist.sort(key=lambda x: x[1])
 
+        self.best_result = [x for x in ass_list if x in phonlist][0]
+        #TODO: if verbose
         print([x for x in ass_list if x in phonlist])
 
         return reslist[:self.n_of_results]

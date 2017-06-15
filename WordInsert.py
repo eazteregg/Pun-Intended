@@ -8,6 +8,7 @@ import argparse
 import os
 from nltk.metrics.distance import edit_distance
 
+"""
 # Get file paths to previously learned sentences and the function word list.
 path_to_this_file = os.path.abspath(__file__) # i.e. /path/to/dir/implement_baseline.py
 script_dir = os.path.split(path_to_this_file)[0] #i.e. /path/to/dir/
@@ -22,9 +23,6 @@ parser.add_argument('sounds_like', type=str,
                     help='sounds like x')
 
 # Required word argument
-"""
-parser.add_argument('meaning', type=str,
-                    help='meaning associated with y')"""
 
 # Optional edit distance argument
 parser.add_argument('dist_arg', type=int, nargs='?',
@@ -48,15 +46,36 @@ corpus_explanations = corpus[1::2]
 x = args.sounds_like
 
 # meaning = args.meaning
+"""
 
 # Implement word in sentence
+class WordInsert():
 
-sentences = []
-for line in corpus_idioms:
-    for word in line.split():
-        distance = edit_distance(x, word)
-        if distance != 0 and distance <= MAX_DISTANCE:
-            sentence = line.replace(word, x)
-            sentences.append(sentence)
+    def __init__(self, sounds_like, corpus, verbose=False, max_distance=2):
+        """
 
-print(sentences)
+        :param sounds_like:
+        :param corpus:
+        :param verbose:
+        :param max_distance:
+        """
+        self.sounds_like = sounds_like
+        self.corpus = corpus
+        self.verbose = verbose
+        self.max_distance = max_distance
+        self.sentences = []
+
+    def insert_word(self):
+        for line in self.corpus:
+            for word in line.split():
+                distance = edit_distance(self.sounds_like, word)
+                if distance != 0 and distance <= self.max_distance:
+                    sentence = line.replace(word, self.sounds_like)
+                    self.sentences.append(sentence)
+
+        if not self.sentences and self.max_distance < 5:
+            print("No similar words to replace with edit distance {} found. Increasing edit distance by 1".format(self.max_distance))
+            self.max_distance += 1
+            self.insert_word()
+
+        return self.sentences
