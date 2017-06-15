@@ -2,12 +2,16 @@ import os
 
 import gensim.scripts.glove2word2vec
 from gensim.models.keyedvectors import KeyedVectors as kv
+from nltk.metrics.distance import edit_distance
 try:
-    import pronouncing
     from nltk.corpus import cmudict
-    from nltk.metrics.distance import edit_distance
 except ImportError:
     print("Please make sure that nltk for Python is installed and download cmudict using nltk.download()")
+
+try:
+    import pronouncing
+except ImportError:
+    print("Use pip install pronouncing")
 
 
 
@@ -20,6 +24,7 @@ class SearchEngine():
         self.n_of_results = n_of_results  # how many results the search engine is supposed to output
         self.combine = combine  # later to be implemented as choice between combination operations
         self.phondict = cmudict.dict()  # CMU Pronouncing Dictionary
+        self.best_result = "no result" # Best word. big word. punny word.
 
         # If vector file in gloVe format, transform it into word2vec and provides option to store it as binary
 
@@ -132,6 +137,8 @@ class SearchEngine():
 
         reslist.sort(key=lambda x: x[1])
 
+        self.best_result = [x for x in ass_list if x in phonlist][0]
+        #TODO: if verbose
         print([x for x in ass_list if x in phonlist])
 
         return reslist[:self.n_of_results]

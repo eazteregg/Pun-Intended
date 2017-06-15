@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sys
 import argparse
+from FindRelatedSentences import FindRelatedSentences
+from WordInsert import WordInsert
 from SearchEngine import SearchEngine
 
 if __name__ == "__main__":
@@ -17,6 +19,7 @@ if __name__ == "__main__":
 
     print("Hello and welcome to the pun aid!")
     se = SearchEngine(1000, cmd_args.vecs, cmd_args.combo)
+    model = se.word_vectors
     print(cmd_args.ortho)
 
     if cmd_args.ortho and cmd_args.rhyme:
@@ -27,6 +30,8 @@ if __name__ == "__main__":
 
         query = input("Start search: \"Sounds like x\" \"Has to do with y\":\n> ")
         query = query.split()
+        sounds_like = query[0]
+        topic = query[1]
 
         if not query:
             break
@@ -36,4 +41,11 @@ if __name__ == "__main__":
             continue
         else:
 
-            print(se.execute_query(query[0], query[1], cmd_args.ortho, cmd_args.rhyme))
+            print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.rhyme))
+            print("+++++++++++puns+++++++++++")
+
+            frs = FindRelatedSentences(topic, model, False, max_results=20)
+            new_corpus = frs.filter_sentences_by_topic()
+            wi = WordInsert(se.best_result, new_corpus, True, max_distance=2)
+            print(wi.insert_word())
+
