@@ -2,12 +2,16 @@ import os
 
 import gensim.scripts.glove2word2vec
 from gensim.models.keyedvectors import KeyedVectors as kv
+from nltk.metrics.distance import edit_distance
 try:
-    import pronouncing
     from nltk.corpus import cmudict
-    from nltk.metrics.distance import edit_distance
 except ImportError:
     print("Please make sure that nltk for Python is installed and download cmudict using nltk.download()")
+
+try:
+    import pronouncing
+except ImportError:
+    print("Use pip install pronouncing")
 
 
 
