@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument('--combo', type=str, default="sum", help="Combination method {sum|prod|inter} (default: %(default)s)")
     parser.add_argument('--rhyme', action="store_true", help="Restrict phonological matches to rhymes")
     parser.add_argument('--ortho', action="store_true", help="Use orthographic matches instead of phonological ones")
+    parser.add_argument('--expl', action="store_true", help="Also use explanations of idioms")
     parser.add_argument('--sound_like', type=str, help="Specify 'sounds-like' word")
     parser.add_argument('--means', type=str, help="Specify 'meaning' word")
     cmd_args = parser.parse_args()
@@ -44,7 +45,7 @@ if __name__ == "__main__":
             print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.rhyme))
             print("+++++++++++puns+++++++++++")
 
-            frs = FindRelatedSentences(topic, model, False, max_results=20)
+            frs = FindRelatedSentences(topic, model, False, max_results=20, expl=cmd_args.expl)
             new_corpus = frs.filter_sentences_by_topic()
             wi = WordInsert(se.best_result, new_corpus, True, max_distance=2)
             print(wi.insert_word())

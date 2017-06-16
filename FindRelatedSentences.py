@@ -50,20 +50,26 @@ class FindRelatedSentences():
             ...
     """
 
-    def __init__(self, topic, model, verbose=False, max_results=10):
+    def __init__(self, topic, model, verbose=False, max_results=10, expl=False):
         self.topic = topic
         self.model = model
         self.verbose = verbose
         self.max_results = max_results
+        self.expl = expl
         self.word_dict = dict()
         self.score_dict = dict()
         self.sentences = []
         self.result_sentences = []
+        if expl:
+            self.corpus = corpus
+        else:
+            self.corpus = corpus_idioms
+
 
 
     def filter_sentences_by_topic(self):
         i = 0
-        for sentence in corpus:
+        for sentence in self.corpus:
             self.sentences.append(sentence.split())
             self.word_dict[i] = sentence.split()
             i += 1
