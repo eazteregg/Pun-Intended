@@ -7,7 +7,7 @@ try:
     from nltk.corpus import cmudict
     from nltk.metrics.distance import edit_distance
 except ImportError:
-    print("Please make sure that nltk for Python is installed and download cmudict using nltk.download()")
+    print("Please make sure that 'pronouncing' and nltk for Python are installed and download cmudict using nltk.download()")
 
 
 
