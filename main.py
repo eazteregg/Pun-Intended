@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument('--ortho', action="store_true", help="Use orthographic matches instead of phonological ones")
     parser.add_argument('--sound_like', type=str, help="Specify 'sounds-like' word")
     parser.add_argument('--means', type=str, help="Specify 'meaning' word")
+    parser.add_argument('--verbose', action="store_true", help="Print additional debugging info")
     cmd_args = parser.parse_args()
 
     print("Hello and welcome to the pun aid!")
