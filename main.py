@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import sys
 import argparse
 from SearchEngine import SearchEngine
 
@@ -17,8 +17,12 @@ if __name__ == "__main__":
     cmd_args = parser.parse_args()
 
     print("Hello and welcome to the pun aid!")
-    se = SearchEngine(1000, cmd_args.vecs, combine='s')
-    se.combine = cmd_args.combo
+    se = SearchEngine(1000, cmd_args.vecs, cmd_args.combo)
+    print(cmd_args.ortho)
+
+    if cmd_args.ortho and cmd_args.rhyme:
+        print('Looking for both orthographic matches and rhyming matches is not possible. Please choose one!')
+        sys.exit()
 
     while True:
 
@@ -28,8 +32,9 @@ if __name__ == "__main__":
         if not query:
             break
 
-        elif len(query) > 2:
+        elif len(query) != 2:
             print("Sorry, you need to provide two arguments!")
             continue
         else:
-            print(se.execute_query(query[0], query[1]))
+
+            print(se.execute_query(query[0], query[1], cmd_args.ortho, cmd_args.rhyme))
