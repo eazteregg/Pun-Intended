@@ -137,7 +137,7 @@ class SearchEngine():
 
         reslist.sort(key=lambda x: x[1])
 
-        self.best_result = [x for x in ass_list if x in phonlist][0]
+        #self.best_result = [x for x in ass_list if x in phonlist][0]
         #TODO: if verbose
         print([x for x in ass_list if x in phonlist])
 
@@ -151,7 +151,9 @@ class SearchEngine():
 
         phon_list = self.get_phon_list(soundslike, 2, ortho, rhyme)
 
-        return self.combines(ass_list, phon_list)
+        result = self.combines(ass_list, phon_list)
+        self.best_result = result[0][0]
+        return result
 
 
 
