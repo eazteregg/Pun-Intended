@@ -9,7 +9,7 @@ try:
 except ImportError:
     print("Please make sure that 'pronouncing' and nltk for Python are installed and download cmudict using nltk.download()")
 
-
+MAX_EDIT_DISTANCE = 1
 
 class SearchEngine():
     """This is the class that will handle all of the operations and queries and such"""
@@ -23,7 +23,7 @@ class SearchEngine():
 
         # If vector file in gloVe format, transform it into word2vec and provides option to store it as binary
 
-        create_bin = 'n'
+        create_bin = ''
 
         try:
             if vectorfile[-4:] == ".bin":
@@ -40,13 +40,17 @@ class SearchEngine():
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', vectorfile), binary=binary)  # retrieve word vectors from file
 
             if not binary:
-                create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
+
+                while create_bin != 'y' and create_bin != 'n':
+                    create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
 
         except ValueError as v:
             print('Your vector file is not in the required word2vec format, conversion will be run...')
             print("Converting gloVe to word2vec format.-------------")
 
-            create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
+            while create_bin != 'y' and create_bin != 'n':
+
+                create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
 
             gensim.scripts.glove2word2vec.glove2word2vec(os.path.join('data', vectorfile), os.path.join('data', 'word2vec.' + vectorfile))
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile))
@@ -142,7 +146,9 @@ class SearchEngine():
         ass_list = [x[0] for x in
                     self.word_vectors.most_similar(positive=[association], topn=self.d_of_comparisons)]
 
-        phon_list = self.get_phon_list(soundslike, 2, ortho, rhyme)
+        phon_list = self.get_phon_list(soundslike, MAX_EDIT_DISTANCE, ortho, rhyme)
+        print(ass_list)
+        print(phon_list)
 
         return self.combines(ass_list, phon_list)
 
