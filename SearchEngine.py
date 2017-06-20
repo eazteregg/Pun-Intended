@@ -1,15 +1,23 @@
 import os
 
 import gensim.scripts.glove2word2vec
+import copy
 from gensim.models.keyedvectors import KeyedVectors as kv
 try:
     import pronouncing
     from nltk.corpus import cmudict
     from nltk.metrics.distance import edit_distance
+    from nltk.stem.wordnet import WordNetLemmatizer
 except ImportError:
     print("Please make sure that 'pronouncing' and nltk for Python are installed and download cmudict using nltk.download()")
 
 MAX_EDIT_DISTANCE = 1
+
+def lemmatize_list(lemmatizer, list):
+
+    list2 = copy.deepcopy(list)
+    map(lambda x: lemmatizer.lemmatize(x), list2)
+    return list2
 
 class SearchEngine():
     """This is the class that will handle all of the operations and queries and such"""
@@ -20,6 +28,7 @@ class SearchEngine():
         self.n_of_results = n_of_results  # how many results the search engine is supposed to output
         self.combine = combine  # later to be implemented as choice between combination operations
         self.phondict = cmudict.dict()  # CMU Pronouncing Dictionary
+        self.lemmatizer = WordNetLemmatizer()
 
         # If vector file in gloVe format, transform it into word2vec and provides option to store it as binary
 
@@ -112,12 +121,24 @@ class SearchEngine():
 
             resdict = dict()
 
-            for x in range(len(ass_list)):
+            for x in range(len(phonlist)):
 
-                if ass_list[x] in phonlist:  # If a word is in ass_list and phonlist initialize its value with x
-                    resdict[ass_list[x]] = x
+                if phonlist[x] in ass_list or self.lemmatizer.lemmatize(phonlist[x]) in ass_list:
+                    resdict[phonlist[x]] = x
+                else:
+                    resdict[phonlist[x]] = 100000000 + x
+
+            for y in range(len(ass_list)):
+
+                if ass_list[y] in phonlist:  # If a word is in ass_list and phonlist initialize its value with x
+                    resdict[ass_list[y]] = y
+
+                elif ass_list[y] in lemmatize_list(self.lemmatizer, phonlist):
+                    index = lemmatize_list(self.lemmatizer, phonlist).index(ass_list[y])
+                    resdict[phonlist[index]] = fn_combo(resdict[phonlist[index]], y)
+
                 else:                        # Otherwise it shouldn't be considered -> add a huge number!
-                    resdict[ass_list[x]] = 100000000 + x
+                    resdict[ass_list[y]] = 100000000 + y
 
             for y in range(len(phonlist)):
 
@@ -147,6 +168,7 @@ class SearchEngine():
                     self.word_vectors.most_similar(positive=[association], topn=self.d_of_comparisons)]
 
         phon_list = self.get_phon_list(soundslike, MAX_EDIT_DISTANCE, ortho, rhyme)
+        print('samurai' in ass_list)
         print(ass_list)
         print(phon_list)
 
