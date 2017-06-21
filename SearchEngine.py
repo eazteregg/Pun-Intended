@@ -1,7 +1,7 @@
 import os
 
 import gensim.scripts.glove2word2vec
-import copy
+import re
 from gensim.models.keyedvectors import KeyedVectors as kv
 try:
     import pronouncing
@@ -13,10 +13,9 @@ except ImportError:
 
 MAX_EDIT_DISTANCE = 1
 
-def lemmatize_list(lemmatizer, list):
-
-    list2 = copy.deepcopy(list)
-    map(lambda x: lemmatizer.lemmatize(x), list2)
+def lemmatize_list(lemmatizer, list1):
+    list2 = [re.sub(r'[\'-]', r'', x) for x in list1]
+    list2 = list(map(lambda x: lemmatizer.lemmatize(x), list2))
     return list2
 
 class SearchEngine():
@@ -123,7 +122,8 @@ class SearchEngine():
 
             for x in range(len(phonlist)):
 
-                if phonlist[x] in ass_list or self.lemmatizer.lemmatize(phonlist[x]) in ass_list:
+                word = phonlist[x].replace('\'', '')
+                if phonlist[x] in ass_list or self.lemmatizer.lemmatize(word) in ass_list:
                     resdict[phonlist[x]] = x
                 else:
                     resdict[phonlist[x]] = 100000000 + x
@@ -131,9 +131,10 @@ class SearchEngine():
             for y in range(len(ass_list)):
 
                 if ass_list[y] in phonlist:  # If a word is in ass_list and phonlist initialize its value with x
-                    resdict[ass_list[y]] = y
+                    resdict[ass_list[y]] = fn_combo(resdict[ass_list[y]], y)
 
-                elif ass_list[y] in lemmatize_list(self.lemmatizer, phonlist):
+                elif ass_list[y] in lemmatize_list(self.lemmatizer, phonlist): # If a word was not found in phonlist by default, try a lemmatized phonlist
+                    print(lemmatize_list(self.lemmatizer, phonlist))
                     index = lemmatize_list(self.lemmatizer, phonlist).index(ass_list[y])
                     resdict[phonlist[index]] = fn_combo(resdict[phonlist[index]], y)
 
@@ -164,11 +165,13 @@ class SearchEngine():
 
     def execute_query(self, soundslike, association, ortho, rhyme):
 
-        ass_list = [x[0] for x in
-                    self.word_vectors.most_similar(positive=[association], topn=self.d_of_comparisons)]
+        try:
+            ass_list = [x[0] for x in
+            self.word_vectors.most_similar(positive=[association], topn=self.d_of_comparisons)]
+        except KeyError:
+            return "Word %s not found in databank." % association
 
         phon_list = self.get_phon_list(soundslike, MAX_EDIT_DISTANCE, ortho, rhyme)
-        print('samurai' in ass_list)
         print(ass_list)
         print(phon_list)
 
