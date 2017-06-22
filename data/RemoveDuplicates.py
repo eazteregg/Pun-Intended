@@ -43,7 +43,7 @@ for key in keys:
         del corpus[key]
     else:
         # Compare starting from the second word.
-        short_keys += [key.split(' ',1)[1]]
+        short_keys += [key.split(' ',1)[1]] #['word1', 'word2 word3 word...']
 '''
 print(len(short_keys))
 s = list(set(short_keys))
@@ -55,3 +55,8 @@ print(duplicates)
 print("lines after deleting one-word-idioms: {}".format(len(corpus)*2))
 
 #TODO: Write corpus to file
+with open("corpus_clean.txt", 'w', encoding="utf-8") as f:
+    f.write("# The first line is always an idiom, the following line is its explanation...")
+    for i, e in corpus.items():
+        f.write(i + '\n')
+        f.write(e + '\n')
