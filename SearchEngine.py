@@ -160,12 +160,12 @@ class SearchEngine():
         reslist.sort(key=lambda x: x[1])
 
         #self.best_result = [x for x in ass_list if x in phonlist][0]
-        #TODO: if verbose
-        print([x for x in ass_list if x in phonlist])
+        if verbose:
+            print([x for x in ass_list if x in phonlist])
 
         return reslist[:self.n_of_results]
 
-    def execute_query(self, soundslike, association, ortho, rhyme):
+    def execute_query(self, soundslike, association, ortho, rhyme, verbose=False):
 
         try:
             ass_list = [x[0] for x in
@@ -174,8 +174,9 @@ class SearchEngine():
             return "Word %s not found in data bank." % association
 
         phon_list = self.get_phon_list(soundslike, MAX_EDIT_DISTANCE, ortho, rhyme)
-        print(ass_list)
-        print(phon_list)
+        if verbose:
+            print(ass_list)
+            print(phon_list)
 
         result = self.combines(ass_list, phon_list)
         self.best_result = result[0][0]
