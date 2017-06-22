@@ -60,3 +60,12 @@ with open("corpus_clean.txt", 'w', encoding="utf-8") as f:
     for i, e in corpus.items():
         f.write(i + '\n')
         f.write(e + '\n')
+        
+test = []
+test2 = [1,2]
+
+if test:
+    print("test")
+    
+if len(test2)>1:
+    print("test2")

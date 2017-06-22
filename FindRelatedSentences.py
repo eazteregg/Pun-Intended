@@ -2,13 +2,14 @@ import os
 import argparse
 import operator
 import gensim.scripts.glove2word2vec
+from docutils.nodes import topic
 
 from gensim.models.keyedvectors import KeyedVectors as kv
 
 # Get file paths.
 path_to_this_file = os.path.abspath(__file__)  # i.e. /path/to/dir/implement_baseline.py
 script_dir = os.path.split(path_to_this_file)[0]  # C:.../Pun-Intended/
-rel_path = "data/idiom_corpus_small.txt"
+rel_path = "data/idiom_corpus.txt"
 abs_corpus_path = os.path.join(script_dir, rel_path)  # C:.../Pun-Intended/data
 bin_file_name = "word2vec.glove.6B.100d.bin"
 
@@ -44,8 +45,6 @@ class FindRelatedSentences():
         else:
             self.corpus = corpus_idioms
 
-
-
     def filter_sentences_by_topic(self):
         i = 0
         for sentence in self.corpus:
@@ -67,15 +66,20 @@ class FindRelatedSentences():
         for key, value in self.word_dict.items():
             self.score_dict[key] = score(self.topic, value, self.model)
 
-        top_sentences_and_scores = []
         top_sentences_and_scores = sorted(self.score_dict.items(), key=operator.itemgetter(1), reverse=True)[:self.max_results]
 
         if self.verbose:
-            print(top_sentences_and_scores)
+            print ("topic: " + self.topic)
+            print("(score, sentence)")
+            for key, score in top_sentences_and_scores[:25]:
+                s = ""
+                for word in self.word_dict[key]:
+                    s += word + " "
+                print("{}: {}".format(score, s))
+
+            #print(top_sentences_and_scores)
 
         for (key, value) in top_sentences_and_scores:
-            if self.verbose:
-                print(' '.join(self.word_dict[key]))
             #self.result_sentences += (self.word_dict[key])
             s = ""
             for word in self.word_dict[key]:

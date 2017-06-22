@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser.add_argument('--sound_like', type=str, help="Specify 'sounds-like' word")
     parser.add_argument('--means', type=str, help="Specify 'meaning' word")
     parser.add_argument('--verbose', action="store_true", help="Print additional debugging info")
+    parser.add_argument('--func', action="store_true", help="Consider function words for replacement.")
     cmd_args = parser.parse_args()
 
     print("Hello and welcome to the pun aid!")
@@ -44,9 +45,9 @@ if __name__ == "__main__":
         else:
 
             print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.rhyme))
-            print("+++++++++++puns+++++++++++")
+            print("Puns: (•_•)  ( •_•)>⌐■-■  (⌐■_■)")
 
-            frs = FindRelatedSentences(topic, model, False, max_results=100, expl=cmd_args.expl)
+            frs = FindRelatedSentences(topic, model, cmd_args.verbose, max_results=300, expl=cmd_args.expl)
             new_corpus = frs.filter_sentences_by_topic()
             wi = WordInsert(se.best_result, new_corpus, True, max_distance=1)
             print(wi.insert_word())

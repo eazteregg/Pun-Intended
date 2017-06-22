@@ -180,6 +180,19 @@ class SearchEngine():
 
         result = self.combines(ass_list, phon_list)
         self.best_result = result[0][0]
+        soundslike_lemma = self.lemmatizer.lemmatize(soundslike)
+        best_result_lemma = self.lemmatizer.lemmatize(self.best_result)
+        i = 0
+        while i < len(result):
+            if soundslike_lemma == best_result_lemma:
+                self.best_result = result[i+1][0]
+                break
+            i += 1
+
+        '''
+        if len(result) > 1 and self.best_result == soundslike:
+            self.best_result = result[1][0]'''
+        print("best result: {}".format(self.best_result))
         return result
 
 
