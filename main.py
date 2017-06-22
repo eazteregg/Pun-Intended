@@ -46,8 +46,8 @@ if __name__ == "__main__":
             print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.rhyme))
             print("+++++++++++puns+++++++++++")
 
-            frs = FindRelatedSentences(topic, model, False, max_results=20, expl=cmd_args.expl)
+            frs = FindRelatedSentences(topic, model, False, max_results=100, expl=cmd_args.expl)
             new_corpus = frs.filter_sentences_by_topic()
-            wi = WordInsert(se.best_result, new_corpus, True, max_distance=2)
+            wi = WordInsert(se.best_result, new_corpus, True, max_distance=1)
             print(wi.insert_word())
 

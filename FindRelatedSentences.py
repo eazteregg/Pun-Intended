@@ -19,27 +19,6 @@ with open(abs_corpus_path, 'r') as corpus:
     corpus_idioms = corpus[0::2]
     corpus_explanations = corpus[1::2]
 
-"""
-parser = argparse.ArgumentParser(description='Look for topic in sentences')
-# Required topic argument
-parser.add_argument('topic', type=str,
-                    help='topic')
-
-# Optional max result sentences argument
-parser.add_argument('max_results', type=int, nargs='?',
-                    help='determines how many sentences to return')
-
-# Optional verbose argument for debug info
-parser.add_argument('-v', "--verbose",
-                    help='increase output verbosity', action="store_true")
-
-args = parser.parse_args()
-if args.topic: word = args.topic
-max_results = 10
-if args.max_results: max_results = args.max_results
-"""
-
-
 class FindRelatedSentences():
     """
     Given a word, chooses sentences in a corpus with related topic.
