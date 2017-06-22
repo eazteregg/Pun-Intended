@@ -3,13 +3,17 @@ import os
 import gensim.scripts.glove2word2vec
 import re
 from gensim.models.keyedvectors import KeyedVectors as kv
+from nltk.metrics.distance import edit_distance
 try:
-    import pronouncing
     from nltk.corpus import cmudict
-    from nltk.metrics.distance import edit_distance
     from nltk.stem.wordnet import WordNetLemmatizer
 except ImportError:
     print("Please make sure that 'pronouncing' and nltk for Python are installed and download cmudict using nltk.download()")
+
+try:
+    import pronouncing
+except ImportError:
+    print("Use pip install pronouncing")
 
 MAX_EDIT_DISTANCE = 1
 
@@ -28,10 +32,11 @@ class SearchEngine():
         self.combine = combine  # later to be implemented as choice between combination operations
         self.phondict = cmudict.dict()  # CMU Pronouncing Dictionary
         self.lemmatizer = WordNetLemmatizer()
+        self.best_result = "no result" # Best word. big word. punny word.
 
         # If vector file in gloVe format, transform it into word2vec and provide option to store it as binary
 
-        create_bin = ''
+        create_bin = 'n'
 
         try:
             if vectorfile[-4:] == ".bin":
@@ -154,6 +159,8 @@ class SearchEngine():
 
         reslist.sort(key=lambda x: x[1])
 
+        #self.best_result = [x for x in ass_list if x in phonlist][0]
+        #TODO: if verbose
         print([x for x in ass_list if x in phonlist])
 
         return reslist[:self.n_of_results]
@@ -170,7 +177,9 @@ class SearchEngine():
         print(ass_list)
         print(phon_list)
 
-        return self.combines(ass_list, phon_list)
+        result = self.combines(ass_list, phon_list)
+        self.best_result = result[0][0]
+        return result
 
 
 

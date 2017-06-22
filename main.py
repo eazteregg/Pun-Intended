@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sys
 import argparse
+from FindRelatedSentences import FindRelatedSentences
+from WordInsert import WordInsert
 from SearchEngine import SearchEngine
 
 if __name__ == "__main__":
@@ -11,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument('--combo', type=str, default="sum", help="Combination method {sum|prod|inter} (default: %(default)s)")
     parser.add_argument('--rhyme', action="store_true", help="Restrict phonological matches to rhymes")
     parser.add_argument('--ortho', action="store_true", help="Use orthographic matches instead of phonological ones")
+    parser.add_argument('--expl', action="store_true", help="Also use explanations of idioms")
     parser.add_argument('--sound_like', type=str, help="Specify 'sounds-like' word")
     parser.add_argument('--means', type=str, help="Specify 'meaning' word")
     parser.add_argument('--verbose', action="store_true", help="Print additional debugging info")
@@ -18,6 +21,7 @@ if __name__ == "__main__":
 
     print("Hello and welcome to the pun aid!")
     se = SearchEngine(1000, cmd_args.vecs, cmd_args.combo)
+    model = se.word_vectors
     print(cmd_args.ortho)
 
     if cmd_args.ortho and cmd_args.rhyme:
@@ -28,6 +32,8 @@ if __name__ == "__main__":
 
         query = input("Start search: \"Sounds like x\" \"Has to do with y\":\n> ")
         query = query.split()
+        sounds_like = query[0]
+        topic = query[1]
 
         if not query:
             break
@@ -37,4 +43,11 @@ if __name__ == "__main__":
             continue
         else:
 
-            print(se.execute_query(query[0], query[1], cmd_args.ortho, cmd_args.rhyme))
+            print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.rhyme))
+            print("+++++++++++puns+++++++++++")
+
+            frs = FindRelatedSentences(topic, model, False, max_results=20, expl=cmd_args.expl)
+            new_corpus = frs.filter_sentences_by_topic()
+            wi = WordInsert(se.best_result, new_corpus, True, max_distance=2)
+            print(wi.insert_word())
+
