@@ -67,6 +67,3 @@ Removes duplicates from the
 # When starting the program you may choose between the different vector models which are in text format out of the box.
 # As the loading of binary files is a lot faster, the program will prefer them over .txt files in case of there being a file with the same name, but .bin ending.
 # You will be offered to create a binary file corresponding to the .txt file you put in, unless there already is one.
-
-
-eazteregg
