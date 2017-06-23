@@ -36,7 +36,7 @@ class SearchEngine():
 
         # If vector file in gloVe format, transform it into word2vec and provide option to store it as binary
 
-        create_bin = 'n'
+        create_bin = ''
 
         try:
             if vectorfile[-4:] == ".bin":
