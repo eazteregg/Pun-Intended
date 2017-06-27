@@ -25,7 +25,7 @@ def lemmatize_list(lemmatizer, list1):
 class SearchEngine():
     """This is the class that will handle all of the operations and queries and such"""
 
-    def __init__(self, d_of_comparisons, vectorfile, combine, n_of_results=5):
+    def __init__(self, d_of_comparisons, vectorfile, combine, n_of_results=5, forcebin=True):
 
         self.d_of_comparisons = d_of_comparisons  # max dimensionality of the two lists
         self.n_of_results = n_of_results  # how many results the search engine is supposed to output
@@ -41,7 +41,7 @@ class SearchEngine():
         try:
             if vectorfile[-4:] == ".bin":
                 binary = True
-            else:
+            elif forcebin:
                 for filename in os.listdir('data'):
                     if filename == 'word2vec.' + vectorfile[:-4] + '.bin':
                         print("Found binary file with the same name as the specified one. Will be loading the binary.")
@@ -49,10 +49,12 @@ class SearchEngine():
                         binary = True
                         break
                     binary = False
+            else:
+                binary = False
 
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', vectorfile), binary=binary)  # retrieve word vectors from file
 
-            if not binary:
+            if not binary and forcebin:
 
                 while create_bin != 'y' and create_bin != 'n':
                     create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
@@ -61,7 +63,7 @@ class SearchEngine():
             print('Your vector file is not in the required word2vec format, conversion will be run...')
             print("Converting gloVe to word2vec format.-------------")
 
-            while create_bin != 'y' and create_bin != 'n':
+            while create_bin != 'y' and create_bin != 'n' and forcebin:
 
                 create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
 
@@ -108,7 +110,7 @@ class SearchEngine():
             results = pronouncing.rhymes(word)
             return results[:self.d_of_comparisons]
 
-    def combines(self, ass_list, phonlist, verbose=False):
+    def combines(self, asslist, phonlist, verbose=False):
 
         """Combines the associative list with the phonetic list. To be implemented: fn_combo which steers the 
         combination operation"""
@@ -127,30 +129,30 @@ class SearchEngine():
             if verbose:
                 print('Lemmatized Phonetic list:', lemmatize_list(self.lemmatizer, phonlist))
 
-            for x in range(len(phonlist)):  # If a word is both in ass_list and phonlist initialize its value with its place x in phonlist
+            for x in range(len(phonlist)):  # If a word is both in asslist and phonlist initialize its value with its place x in phonlist
 
                 word = re.sub(r'\'', r'', phonlist[x])  # Get rid of single quotes as they don't affect pronunciation
 
-                if phonlist[x] in ass_list or self.lemmatizer.lemmatize(word) in ass_list:  # Also check for the lemmatized version of word -> more likely to be found in ass_list
+                if phonlist[x] in asslist or self.lemmatizer.lemmatize(word) in asslist:  # Also check for the lemmatized version of word -> more likely to be found in asslist
                     resdict[phonlist[x]] = x
                 else:                          # If the word is in neither list, initialize its value with a huge number
                     resdict[phonlist[x]] = 100000000 + x
 
-            for y in range(len(ass_list)):  # Now, for combining both lists, go the other way and check starting from ass_list
+            for y in range(len(asslist)):  # Now, for combining both lists, go the other way and check starting from asslist
 
-                if ass_list[y] in phonlist:  # If a word in its out-of-the-box form is found in phonlist, combine the scores
-                    resdict[ass_list[y]] = fn_combo(resdict[ass_list[y]], y)
+                if asslist[y] in phonlist:  # If a word in its out-of-the-box form is found in phonlist, combine the scores
+                    resdict[asslist[y]] = fn_combo(resdict[asslist[y]], y)
 
-                elif ass_list[y] in lemmatized_phonlist:  # If a word was not found in phonlist by default, try a lemmatized phonlist
+                elif asslist[y] in lemmatized_phonlist:  # If a word was not found in phonlist by default, try a lemmatized phonlist
 
-                    index = lemmatized_phonlist.index(ass_list[y]) # Find the first occurrence of the word
+                    index = lemmatized_phonlist.index(asslist[y]) # Find the first occurrence of the word
                     resdict[phonlist[index]] = fn_combo(resdict[phonlist[index]], y)  # combine
 
                 else:                        # Otherwise it shouldn't be considered -> add a huge number!
-                    resdict[ass_list[y]] = 100000000 + y
+                    resdict[asslist[y]] = 100000000 + y
 
         elif self.combine == 'inter':  # simply return the intersection of both lists
-            return [x for x in ass_list if x in phonlist]
+            return [x for x in asslist if x in phonlist]
 
         reslist = []
 
@@ -159,9 +161,9 @@ class SearchEngine():
 
         reslist.sort(key=lambda x: x[1])
 
-        #self.best_result = [x for x in ass_list if x in phonlist][0]
+        #self.best_result = [x for x in asslist if x in phonlist][0]
         if verbose:
-            print([x for x in ass_list if x in phonlist])
+            print([x for x in asslist if x in phonlist])
 
         return reslist[:self.n_of_results]
 

@@ -23,7 +23,6 @@ if __name__ == "__main__":
     print("Hello and welcome to the pun aid!")
     se = SearchEngine(1000, cmd_args.vecs, cmd_args.combo)
     model = se.word_vectors
-    print(cmd_args.ortho)
 
     if cmd_args.ortho and cmd_args.rhyme:
         print('Looking for both orthographic matches and rhyming matches is not possible. Please choose one!')
@@ -33,16 +32,19 @@ if __name__ == "__main__":
 
         query = input("Start search: \"Sounds like x\" \"Has to do with y\":\n> ")
         query = query.split()
-        sounds_like = query[0]
-        topic = query[1]
 
         if not query:
+            print("Bye, byeee!! Sorry, no pun available for this prompt, yet...")
             break
 
         elif len(query) != 2:
             print("Sorry, you need to provide two arguments!")
             continue
         else:
+
+
+            sounds_like = query[0]
+            topic = query[1]
 
             print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.rhyme))
             print("Puns: (•_•)  ( •_•)>⌐■-■  (⌐■_■)")

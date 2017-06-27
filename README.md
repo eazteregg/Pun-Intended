@@ -45,7 +45,9 @@ Make sure that the follow dependencies are installed before trying to run Pun-In
 - uses edit distance (sum, prod, combination)
 - lemmatize words
 
-### TestSearchEngine.py
+### test_searchEngine.py
+- if you want to run the tests using a vector file in .txt format without being prompted for conversion to binary,
+  switch the forcebin argument to False
 
 ### WordInsert.py
 - insert best generated word into idioms
