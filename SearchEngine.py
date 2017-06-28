@@ -1,51 +1,79 @@
 import os
 
 import gensim.scripts.glove2word2vec
+import re
 from gensim.models.keyedvectors import KeyedVectors as kv
 import os
 import g2pwrapper as g2p
 
 from nltk.corpus import cmudict
 from nltk.metrics.distance import edit_distance
+try:
+    from nltk.corpus import cmudict
+    from nltk.stem.wordnet import WordNetLemmatizer
+except ImportError:
+    print("Please make sure that 'pronouncing' and nltk for Python are installed and download cmudict using nltk.download()")
+
+try:
+    import pronouncing
+except ImportError:
+    print("Use pip install pronouncing")
+
+MAX_EDIT_DISTANCE = 1
+
+def lemmatize_list(lemmatizer, list1):
+    list2 = [re.sub(r'[\'-]', r'', x) for x in list1]
+    list2 = list(map(lambda x: lemmatizer.lemmatize(x), list2))
+    return list2
 
 
-class SearchEngine():
+class SearchEngine:
+
     """This is the class that will handle all of the operations and queries and such"""
 
-    def __init__(self, d_of_comparisons, vectorfile, n_of_results=5, combine='s'):
+    def __init__(self, d_of_comparisons, vectorfile, combine, n_of_results=5, forcebin=True):
 
         self.d_of_comparisons = d_of_comparisons  # max dimensionality of the two lists
         self.n_of_results = n_of_results  # how many results the search engine is supposed to output
         self.combine = combine  # later to be implemented as choice between combination operations
         self.g2p = g2p.G2PWrapper('cmudict-model6', g2p.PATH_G2P)
         self.phondict = cmudict.dict()  # CMU Pronouncing Dictionary
+        self.lemmatizer = WordNetLemmatizer()
+        self.best_result = "no result" # Best word. big word. punny word.
 
-        # If vector file in gloVe format, transform it into word2vec and provides option to store it as binary
+        # If vector file in gloVe format, transform it into word2vec and provide option to store it as binary
 
-        create_bin = 'n'
+        create_bin = ''
 
         try:
             if vectorfile[-4:] == ".bin":
                 binary = True
-            else:
+            elif forcebin:
+                regex = r'(word2vec.)?' + vectorfile[:-4] + '.bin'
                 for filename in os.listdir('data'):
-                    if filename == 'word2vec.' + vectorfile[:-4] + '.bin':
+                    if re.search(regex, filename):
                         print("Found binary file with the same name as the specified one. Will be loading the binary.")
                         vectorfile = filename
                         binary = True
                         break
                     binary = False
+            else:
+                binary = False
 
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', vectorfile), binary=binary)  # retrieve word vectors from file
 
-            if not binary:
-                create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
+            if not binary and forcebin:
 
-        except ValueError as v:
-            print(v)
+                while create_bin != 'y' and create_bin != 'n':
+                    create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
+
+        except ValueError:
+            print('Your vector file is not in the required word2vec format, conversion will be run...')
             print("Converting gloVe to word2vec format.-------------")
 
-            create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
+            while create_bin != 'y' and create_bin != 'n' and forcebin:
+
+                create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
 
             gensim.scripts.glove2word2vec.glove2word2vec(os.path.join('data', vectorfile), os.path.join('data', 'word2vec.' + vectorfile))
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile))
@@ -53,84 +81,142 @@ class SearchEngine():
         if create_bin == 'y':
             self.word_vectors.save_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile[:-4] + '.bin'), binary=True)
 
-    def get_phon_list(self, word, max_dist):
-        """Returns a list of phonetically similar words to word with max levenshtein distance of max_dist"""
-        try:
+    def get_phon_list(self, word, max_dist, ortho=None, rhyme=None):
+        """Returns a list of phonetically similar words to word with max levenshtein distance of max_dist. If ortho is not
+        None, the function will instead return a list of orthographically similar words."""
 
-            phon_rep = self.phondict[word][0]  # CMU dict returns a list of pronunciations, thus [0]
-            print(phon_rep)
-        except KeyError:
+        if not ortho and not rhyme:  # Default case: Use CMU dict
+
+            iterlist = self.phondict  # The list being iterated over is thus the CMU dict
 
             try:
-                phon_rep = self.g2p.transcribeWord(word)
+                phon_rep = iterlist[word][0]  # CMU dict returns a list of pronunciations, thus [0]
 
-            except Exception:
+
+            except KeyError:
+
+                try:
+                    phon_rep = self.g2p.transcribeWord(word)
+
+                except Exception:
 
                 print("Word not found in data bank!")
 
-        results = []
-        for x in self.phondict:
-            pron_x = self.phondict[x][0]
-            lvdist = edit_distance(pron_x, phon_rep)
+        elif ortho:  # If orthographic comparison is turned on, iterate over the CMU dict's keys instead
+            iterlist = self.phondict.keys()  # which are simply orthographic words
 
-            if lvdist <= max_dist:
-                results.append((x, lvdist))
+        if not rhyme:  # If rhyme is turned on, skip the searching of the CMU dict
+            results = []
+            for x in iterlist:
 
-        results.sort(key=lambda x: x[1])
-        return [x[0] for x in results[:self.d_of_comparisons]]
+                if not ortho:
+                    pron_x = iterlist[x][0]
 
-    def combines(self, ass_list, phonlist):
+                    if pron_x == phon_rep:  # If the pronunciation of x is the same as word, it shouldn't be added to
+                        continue            # the results, because we want phonetically similar words, not same ones
 
-        """Combines the associative list with the phonetic list. To be implemented: fn_combo which steers the 
-        combination operation"""
+                    lvdist = edit_distance(pron_x, phon_rep)
+
+                else:
+                    lvdist = edit_distance(x, word)  # Simply check the orthographic edit_distance if ortho is True
+
+                if lvdist <= max_dist:  # Add x from CMU dict to results, if its edit_distance to word is < max_dist
+                    results.append((x, lvdist))
+
+            results.sort(key=lambda x: x[1])    # Sort the results by edit_distance
+            return [x[0] for x in results[:self.d_of_comparisons]]
+
+        else:  # If looking for rhymes, use pronouncing package to retrieve them
+            results = pronouncing.rhymes(word)
+            return results[:self.d_of_comparisons]
+
+    def combines(self, asslist, phonlist, verbose=False):
+
+        """Combines the associative list with the phonetic list. Using three types of possible combination methods
+        as dictated by self.combine"""
 
         fn_combo = None
         if self.combine == 'sum':
             fn_combo = lambda m, n: m+n
 
         elif self.combine == 'prod':
-            fn_combo = lambda m, n: (m+1)*(n+1) # If either number is 0, the calculation is senseless
+            fn_combo = lambda m, n: (m+1)*(n+1)  # If either number is 0, the calculation is senseless
 
         if fn_combo:        # If either summation or multiplication has been chosen as combination method
 
             resdict = dict()
+            lemmatized_phonlist = lemmatize_list(self.lemmatizer, phonlist)
+            if verbose:
+                print('Lemmatized Phonetic list:', lemmatize_list(self.lemmatizer, phonlist))
 
-            for x in range(len(ass_list)):
+            for x in range(len(phonlist)):  # If a word is both in asslist and phonlist initialize its value with its place x in phonlist
 
-                if ass_list[x] in phonlist:  # If a word is in ass_list and phonlist initialize its value with x
-                    resdict[ass_list[x]] = x
+                word = re.sub(r'\'', r'', phonlist[x])  # Get rid of single quotes as they don't affect pronunciation
+
+                if phonlist[x] in asslist or self.lemmatizer.lemmatize(word) in asslist:  # Also check for the lemmatized version of word -> more likely to be found in asslist
+                    resdict[phonlist[x]] = x
+                else:                          # If the word is in neither list, initialize its value with a huge number
+                    resdict[phonlist[x]] = 100000000 + x
+
+            for y in range(len(asslist)):  # Now, for combining both lists, go the other way and check starting from asslist
+
+                if asslist[y] in phonlist:  # If a word in its out-of-the-box form is found in phonlist, combine the scores
+                    resdict[asslist[y]] = fn_combo(resdict[asslist[y]], y)
+
+                elif asslist[y] in lemmatized_phonlist:  # If a word was not found in phonlist by default, try a lemmatized phonlist
+
+                    index = lemmatized_phonlist.index(asslist[y]) # Find the first occurrence of the word
+                    resdict[phonlist[index]] = fn_combo(resdict[phonlist[index]], y)  # combine
+
                 else:                        # Otherwise it shouldn't be considered -> add a huge number!
-                    resdict[ass_list[x]] = 100000000 + x
-
-            for y in range(len(phonlist)):
-
-                try:                # Now for all words in phonlist combine their place with whats already in resdict
-                    resdict[phonlist[y]] = fn_combo(resdict[phonlist[y]], y)
-                except KeyError:    # If it is not already in resdict, it shouldn't be considered -> add a huge number!
-                    resdict[phonlist[y]] = 100000000 + y
+                    resdict[asslist[y]] = 100000000 + y
 
         elif self.combine == 'inter':  # simply return the intersection of both lists
-            return [x for x in ass_list if x in phonlist]
+            return [x for x in asslist if x in phonlist]
 
         reslist = []
 
         for word in resdict:
-            reslist.append((word, resdict[word]))
+            reslist.append((word, resdict[word]))  # Sort words by their respective score
 
         reslist.sort(key=lambda x: x[1])
 
-        print([x for x in ass_list if x in phonlist])
+        #self.best_result = [x for x in asslist if x in phonlist][0]
+        if verbose:
+            print([x for x in asslist if x in phonlist])
 
         return reslist[:self.n_of_results]
-        # return [x[0] for x in reslist[:self.n_of_results]]
 
-    def execute_query(self, soundslike, association):
+    def execute_query(self, soundslike, association, ortho, rhyme, verbose=False):
+        """Method responsible for the execution of the main query. All of the other parts flow together in this."""
 
-        ass_list = [x[0] for x in
-                    self.word_vectors.most_similar(positive=[association], topn=self.d_of_comparisons)]
-        phon_list = self.get_phon_list(soundslike, 2)
+        try:
+            ass_list = [x[0] for x in
+                        self.word_vectors.most_similar(positive=[association], topn=self.d_of_comparisons)]
+        except KeyError:
+            return "Word %s not found in data bank." % association
 
-        return self.combines(ass_list, phon_list)
+        phon_list = self.get_phon_list(soundslike, MAX_EDIT_DISTANCE, ortho, rhyme)
+        if verbose:
+            print('Associations:\n', ass_list)
+            print('Phonetically similar:\n', phon_list)
+
+        result = self.combines(ass_list, phon_list)
+        self.best_result = result[0][0]
+        soundslike_lemma = self.lemmatizer.lemmatize(soundslike)
+        best_result_lemma = self.lemmatizer.lemmatize(self.best_result)
+        i = 0
+        while i < len(result):
+            if soundslike_lemma == best_result_lemma:
+                self.best_result = result[i+1][0]
+                break
+            i += 1
+
+        '''
+        if len(result) > 1 and self.best_result == soundslike:
+            self.best_result = result[1][0]'''
+        print("best result: {}".format(self.best_result))
+        return result
 
 
 
