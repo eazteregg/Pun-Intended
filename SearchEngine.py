@@ -100,7 +100,7 @@ class SearchEngine:
 
                 except Exception:
 
-                print("Word not found in data bank!")
+                    print("Word not found in data bank!")
 
         elif ortho:  # If orthographic comparison is turned on, iterate over the CMU dict's keys instead
             iterlist = self.phondict.keys()  # which are simply orthographic words
