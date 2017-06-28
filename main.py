@@ -46,7 +46,7 @@ if __name__ == "__main__":
             sounds_like = query[0]
             topic = query[1]
 
-            print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.rhyme))
+            print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.rhyme, cmd_args.verbose))
             print("Puns: (•_•)  ( •_•)>⌐■-■  (⌐■_■)")
 
             frs = FindRelatedSentences(topic, model, cmd_args.verbose, max_results=300, expl=cmd_args.expl)

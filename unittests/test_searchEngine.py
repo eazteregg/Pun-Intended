@@ -11,17 +11,17 @@ class TestSearchEngine(TestCase):
 
         self.se.combine = 'sum'
         self.assertEqual(self.se.execute_query('lose', 'alcohol', False, False),
-                         [('booze', 29), ('laws', 234), ('lows', 584), ('dues', 627), ("law's", 772)])
+                         [('booze', 23), ('laws', 228), ('lows', 578), ('dues', 621), ("law's", 766)])
         self.assertEqual(self.se.execute_query('summarize', 'warrior', False, False),
-                         [("samurai's", 2), ('samurais', 2), ('summarize', 100000000), ('warriors', 100000000),
+                         [("samurai's", 1), ('samurais', 1), ('warriors', 100000000), ('somers', 100000002),
                           ('dragon', 100000002)])
 
     def test_execute_query_Multiplication(self):
         self.se.combine = 'prod'
         self.assertEqual(self.se.execute_query('lose', 'alcohol', False, False),
-                         [('booze', 228), ('laws', 7683), ('dues', 12768), ("law's", 27968), ('lows', 41328)])
+                         [('booze', 114), ('laws', 6501), ('dues', 9120), ("law's", 23552), ('lows', 38304)])
         self.assertEqual(self.se.execute_query('summarize', 'warrior', False, False),
-                         [('samurais', 2), ("samurai's", 4), ('summarize', 100000000), ('warriors', 100000000),
+                         [('samurais', 1), ("samurai's", 2), ('warriors', 100000000), ('somers', 100000002),
                           ('dragon', 100000002)])
 
     def tearDown(self):

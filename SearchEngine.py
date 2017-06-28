@@ -22,7 +22,9 @@ def lemmatize_list(lemmatizer, list1):
     list2 = list(map(lambda x: lemmatizer.lemmatize(x), list2))
     return list2
 
-class SearchEngine():
+
+class SearchEngine:
+
     """This is the class that will handle all of the operations and queries and such"""
 
     def __init__(self, d_of_comparisons, vectorfile, combine, n_of_results=5, forcebin=True):
@@ -42,8 +44,9 @@ class SearchEngine():
             if vectorfile[-4:] == ".bin":
                 binary = True
             elif forcebin:
+                regex = r'(word2vec.)?' + vectorfile[:-4] + '.bin'
                 for filename in os.listdir('data'):
-                    if filename == 'word2vec.' + vectorfile[:-4] + '.bin':
+                    if re.search(regex, filename):
                         print("Found binary file with the same name as the specified one. Will be loading the binary.")
                         vectorfile = filename
                         binary = True
@@ -77,50 +80,55 @@ class SearchEngine():
         """Returns a list of phonetically similar words to word with max levenshtein distance of max_dist. If ortho is not
         None, the function will instead return a list of orthographically similar words."""
 
-        if not ortho and not rhyme:
-            iterlist = self.phondict
-            try:
+        if not ortho and not rhyme:  # Default case: Use CMU dict
 
+            iterlist = self.phondict  # The list being iterated over is thus the CMU dict
+
+            try:
                 phon_rep = iterlist[word][0]  # CMU dict returns a list of pronunciations, thus [0]
-                print(phon_rep)
+
             except KeyError:
                 print("Word not found in data bank!")
 
-        elif ortho:
-            iterlist = self.phondict.keys()
+        elif ortho:  # If orthographic comparison is turned on, iterate over the CMU dict's keys instead
+            iterlist = self.phondict.keys()  # which are simply orthographic words
 
-        if not rhyme:
+        if not rhyme:  # If rhyme is turned on, skip the searching of the CMU dict
             results = []
             for x in iterlist:
 
                 if not ortho:
                     pron_x = iterlist[x][0]
+
+                    if pron_x == phon_rep:  # If the pronunciation of x is the same as word, it shouldn't be added to
+                        continue            # the results, because we want phonetically similar words, not same ones
+
                     lvdist = edit_distance(pron_x, phon_rep)
 
                 else:
-                    lvdist = edit_distance(x, word)
+                    lvdist = edit_distance(x, word)  # Simply check the orthographic edit_distance if ortho is True
 
-                if lvdist <= max_dist:
+                if lvdist <= max_dist:  # Add x from CMU dict to results, if its edit_distance to word is < max_dist
                     results.append((x, lvdist))
 
-            results.sort(key=lambda x: x[1])
+            results.sort(key=lambda x: x[1])    # Sort the results by edit_distance
             return [x[0] for x in results[:self.d_of_comparisons]]
 
-        else:
+        else:  # If looking for rhymes, use pronouncing package to retrieve them
             results = pronouncing.rhymes(word)
             return results[:self.d_of_comparisons]
 
     def combines(self, asslist, phonlist, verbose=False):
 
-        """Combines the associative list with the phonetic list. To be implemented: fn_combo which steers the 
-        combination operation"""
+        """Combines the associative list with the phonetic list. Using three types of possible combination methods
+        as dictated by self.combine"""
 
         fn_combo = None
         if self.combine == 'sum':
             fn_combo = lambda m, n: m+n
 
         elif self.combine == 'prod':
-            fn_combo = lambda m, n: (m+1)*(n+1) # If either number is 0, the calculation is senseless
+            fn_combo = lambda m, n: (m+1)*(n+1)  # If either number is 0, the calculation is senseless
 
         if fn_combo:        # If either summation or multiplication has been chosen as combination method
 
@@ -168,6 +176,7 @@ class SearchEngine():
         return reslist[:self.n_of_results]
 
     def execute_query(self, soundslike, association, ortho, rhyme, verbose=False):
+        """Method responsible for the execution of the main query. All of the other parts flow together in this."""
 
         try:
             ass_list = [x[0] for x in
@@ -177,8 +186,8 @@ class SearchEngine():
 
         phon_list = self.get_phon_list(soundslike, MAX_EDIT_DISTANCE, ortho, rhyme)
         if verbose:
-            print(ass_list)
-            print(phon_list)
+            print('Associations:\n', ass_list)
+            print('Phonetically similar:\n', phon_list)
 
         result = self.combines(ass_list, phon_list)
         self.best_result = result[0][0]
