@@ -49,7 +49,7 @@ class G2PWrapper:
         # retrieve pronunciation only
         result = result.split()[1:]
         # fuse pronunciation back together
-        result = ' '.join(result)
+        #result = ' '.join(result)
 
         return result
 

@@ -85,12 +85,10 @@ class SearchEngine:
         None, the function will instead return a list of orthographically similar words."""
 
         if not ortho and not rhyme:  # Default case: Use CMU dict
-
             iterlist = self.phondict  # The list being iterated over is thus the CMU dict
 
             try:
                 phon_rep = iterlist[word][0]  # CMU dict returns a list of pronunciations, thus [0]
-
 
             except KeyError:
 
