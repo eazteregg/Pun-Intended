@@ -1,5 +1,5 @@
 # readme for Pun-Intended project
-The goal of this project is to aid in pun generation.
+The goal of this project is to aid in pun generation. 
 
 ### Specifications
 This project is written in python 3.5
@@ -13,9 +13,9 @@ Make sure that the follow dependencies are installed before trying to run Pun-In
     - Make sure that gensim is installed and running. On Windows: This requires some workarounds. You will need numpy, mkl and scipy installed, which can be found at http://www.lfd.uci.edu/~gohlke/pythonlibs/. You may also need to install a c++ compiler. Installing gensim in Anaconda may be a good option (https://www.continuum.io/downloads)
 
 ### How to Run
-1.  Install the dependencies mentioned above
-2. clone the git to your local machine with `git clone https://github.com/eazteregg/Pun-Intended`
-
+1. Install the dependencies mentioned above
+2. Clone the git to your local machine with `git clone https://github.com/eazteregg/Pun-Intended`
+3. Download the vectors from the GloVe website (http://nlp.stanford.edu/data/glove.6B.zip), export and add `glove.6B.100d.txt` to the data folder.
 
 ### Command line Run options
 - '--vecs' choose which glove text to build vectors from, default="glove.6B.100d.txt"
@@ -60,12 +60,16 @@ Make sure that the follow dependencies are installed before trying to run Pun-In
 Finds the topics of 
 
 ### Remove Duplicates.py
-Removes duplicates from the 
+- Removes duplicates from the idiom corpus.
 
 ### function_words.txt
 
 ### idiom_corpus.txt
 
-# When starting the program you may choose between the different vector models which are in text format out of the box.
-# As the loading of binary files is a lot faster, the program will prefer them over .txt files in case of there being a file with the same name, but .bin ending.
-# You will be offered to create a binary file corresponding to the .txt file you put in, unless there already is one.
+
+<!---
+From an older Version of readme:
+When starting the program you may choose between the different vector models which are in text format out of the box.
+As the loading of binary files is a lot faster, the program will prefer them over .txt files in case of there being a file with the same name, but .bin ending.
+You will be offered to create a binary file corresponding to the .txt file you put in, unless there already is one.
+-->
