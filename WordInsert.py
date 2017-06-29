@@ -7,6 +7,7 @@ Created on Thu May 25 19:55:45 2017
 import argparse
 import string
 import os
+import g2pwrapper as g2p
 from nltk.metrics.distance import edit_distance
 try:
     from nltk.corpus import cmudict
@@ -50,9 +51,10 @@ class WordInsert():
         self.sentences = []
         self.use_function_words = use_function_words
         self.cmudict = cmudict.dict()
+        self.g2p = g2p.G2PWrapper('cmudict-model6', g2p.PATH_G2P)
+        self.cmuextension = {}
 
-
-    def insert_word(self, ortho=False):
+    def insert_word(self, ortho=False, rerun=False):
         for line in self.corpus:
             for word in wordpunct_tokenize(line):
                 if (word in function_words and not self.use_function_words) or word in string.punctuation:
@@ -60,7 +62,29 @@ class WordInsert():
                 if ortho:
                     distance = edit_distance(self.sounds_like, word)
                 else:
-                    distance = edit_distance(self.cmudict[self.sounds_like][0], self.cmudict[word][0])
+                    try:  # Try to find phonetic representation in cmudict
+                        phonrep1 = self.cmudict[self.sounds_like][0]
+                    except KeyError:  # If it is not in there, do the following:
+                        if rerun:     # If this is is a recursive rerun, as called at the end of this function
+                            phonrep1 = self.cmuextension[self.sounds_like]  # Load the representation as computed previously
+                        else:       # If this is the first run, use g2p to transcribe and save it in cmuextension.
+                            phonrep1 = self.g2p.transcribeWord(self.sounds_like)
+                            self.cmuextension[self.sounds_like] = phonrep1
+                            if self.verbose:
+                                print(self.sounds_like, phonrep1)
+                    try:  # Try to find phonetic representation in cmudict
+                        phonrep2 = self.cmudict[word][0]
+                    except KeyError:    # If not in there follow the steps as described above
+                        if rerun:
+                            phonrep2 = self.cmuextension[word]
+                        else:
+                            phonrep2 = self.g2p.transcribeWord(word)
+                            self.cmuextension[word] = phonrep2
+                            if self.verbose:
+                                print(word, phonrep2)
+
+                    distance = edit_distance(phonrep1, phonrep2)
+
                 if distance != 0 and distance <= self.max_distance:
                     sentence = line.replace(word, self.sounds_like)
                     if sentence not in self.sentences:
@@ -70,7 +94,7 @@ class WordInsert():
             print("No similar words to replace with edit distance {} found. \
                 Increasing edit distance by 1".format(self.max_distance))
             self.max_distance += 1
-            self.insert_word()
+            self.insert_word(rerun=True)
 
         elif not self.sentences:
             print("No similar words to replace with edit distance {} found. ".format(self.max_distance))

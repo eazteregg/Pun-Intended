@@ -6,7 +6,6 @@ from gensim.models.keyedvectors import KeyedVectors as kv
 import os
 import g2pwrapper as g2p
 
-from nltk.corpus import cmudict
 from nltk.metrics.distance import edit_distance
 try:
     from nltk.corpus import cmudict
