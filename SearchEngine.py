@@ -110,7 +110,8 @@ class SearchEngine:
 
                 if lvdist <= max_dist:  # Add x from CMU dict to results, if its edit_distance to word is < max_dist
                     results.append((x, lvdist))
-
+            
+            results.sort(key=lambda x: x[0])    # Makes 'results' look similar each time and on different machines
             results.sort(key=lambda x: x[1])    # Sort the results by edit_distance
             return [x[0] for x in results[:self.d_of_comparisons]]
 
