@@ -5,8 +5,20 @@ Created on Thu May 25 19:55:45 2017
 @author: Maximilian
 """
 import argparse
+import string
 import os
 from nltk.metrics.distance import edit_distance
+try:
+    from nltk.corpus import cmudict
+    from nltk.tokenize import wordpunct_tokenize
+except ImportError:
+    print("Please make sure that 'pronouncing' and nltk for Python are installed and download cmudict using nltk.download()")
+try:
+    import pronouncing
+except ImportError:
+    print("Use: pip install pronouncing")
+
+
 
 # Get file paths to function words.
 script_path = os.path.abspath(__file__) # i.e. /path/to/dir/WordInsert.py
@@ -37,13 +49,18 @@ class WordInsert():
         self.max_distance = max_distance
         self.sentences = []
         self.use_function_words = use_function_words
+        self.cmudict = cmudict.dict()
 
-    def insert_word(self):
+
+    def insert_word(self, ortho=False):
         for line in self.corpus:
-            for word in line.split():
-                if word in function_words and not self.use_function_words:
-                    continue # ignore function words
-                distance = edit_distance(self.sounds_like, word)
+            for word in wordpunct_tokenize(line):
+                if (word in function_words and not self.use_function_words) or word in string.punctuation:
+                    continue  # ignore function words and punctuation
+                if ortho:
+                    distance = edit_distance(self.sounds_like, word)
+                else:
+                    distance = edit_distance(self.cmudict[self.sounds_like][0], self.cmudict[word][0])
                 if distance != 0 and distance <= self.max_distance:
                     sentence = line.replace(word, self.sounds_like)
                     if sentence not in self.sentences:
