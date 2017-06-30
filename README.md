@@ -1,12 +1,10 @@
-# readme for Pun-Intended project
-The goal of this project is to aid in pun generation. 
-
-### Specifications
-This project is written in python 3.5
+# Pun-Intended
+This software aids in pun generation, and other word-plays, like song lyrics and poetry.
 
 ### Dependencies
+This project is written in python 3.5
 Make sure that the follow dependencies are installed before trying to run Pun-Intended:
-- nltk
+- nltk: `pip install --user -U nltk`
 - cmudict corpus
     - To check/download cmudict, in the interperter type nltk.download() or from the command line: `python -m nltk.downloader cmudict`
 - gensim
