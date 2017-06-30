@@ -102,9 +102,6 @@ class WordInsert():
                 self.sentences += [new]
                 self.sentences += ['']
 
-            print("######################")
-            print(self.sentences)
-            print("####################")
             if not self.recursion:
                 return self.sentences
 
