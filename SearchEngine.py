@@ -1,4 +1,5 @@
 import os
+import sys
 
 import gensim.scripts.glove2word2vec
 import re
@@ -21,6 +22,33 @@ def lemmatize_list(lemmatizer, list1):
     list2 = [re.sub(r'[\'-]', r'', x) for x in list1]
     list2 = list(map(lambda x: lemmatizer.lemmatize(x), list2))
     return list2
+
+# glove2word2vec helper methods
+def myGet_glove_info(glove_file_name):
+    """Return the number of vectors and dimensions in a file in GloVe format."""
+    with open(glove_file_name, encoding='utf-8') as f:
+        num_lines = sum(1 for line in f)
+    with open(glove_file_name, encoding='utf-8') as f:
+        num_dims = len(f.readline().split()) - 1
+    return num_lines, num_dims
+
+def myGlove2word2vec(glove_input_file, word2vec_output_file):
+    """Convert `glove_input_file` in GloVe format into `word2vec_output_file in word2vec format."""
+    num_lines, num_dims = myGet_glove_info(glove_input_file)
+    if sys.version_info < (3,):
+        with open(word2vec_output_file, 'wb', encoding='utf-8') as fout:
+            fout.write("%s %s\n" % (num_lines, num_dims))
+            with open(glove_input_file, 'rb', encoding='utf-8') as fin:
+                for line in fin:
+                    fout.write(line)
+        return num_lines, num_dims
+    else:
+        with open(word2vec_output_file, 'w', encoding='utf-8') as fout:
+            fout.write("%s %s\n" % (num_lines, num_dims))
+            with open(glove_input_file, 'r', encoding='utf-8') as fin:
+                for line in fin:
+                    fout.write(line)
+        return num_lines, num_dims
 
 
 class SearchEngine:
@@ -55,6 +83,7 @@ class SearchEngine:
             else:
                 binary = False
 
+            print("Reading vectorfile...")
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', vectorfile), binary=binary)  # retrieve word vectors from file
 
             if not binary and forcebin:
@@ -70,8 +99,9 @@ class SearchEngine:
 
                 create_bin = input("Would you like to create a binary file for your vector file, so that future loading times may be shortened? y/n\n")
 
-            gensim.scripts.glove2word2vec.glove2word2vec(os.path.join('data', vectorfile), os.path.join('data', 'word2vec.' + vectorfile))
+            myGlove2word2vec(os.path.join('data', vectorfile), os.path.join('data', 'word2vec.' + vectorfile))
             self.word_vectors = kv.load_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile))
+
 
         if create_bin == 'y':
             self.word_vectors.save_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile[:-4] + '.bin'), binary=True)
@@ -206,6 +236,4 @@ class SearchEngine:
             self.best_result = result[1][0]'''
         print("best result: {}".format(self.best_result))
         return result
-
-
 
