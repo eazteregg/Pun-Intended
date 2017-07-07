@@ -8,10 +8,14 @@ cmu = cmudict.dict()
 
 for i in buck[1]:
     if i in cmu:
-        cmu_tr = re.sub('[0-9]', '', ' '.join(cmu[i][0]).lower())
-        bu_tr = buck[1][i]
-        if cmu_tr in bu_tr:
+        status = 'no'
+        for f in cmu[i]:
+            cmu_tr = re.sub('[0-9]', '', ' '.join(f).lower())
+            bu_tr = buck[1][i]
+            if cmu_tr in bu_tr:
+                status = 'yes'
+        if status == 'yes':
             print('ok')
         else:
-            print(cmu_tr, bu_tr)
+            print(cmu[i], bu_tr)
         
