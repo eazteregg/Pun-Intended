@@ -1,5 +1,6 @@
 import os
 
+import json
 import gensim.scripts.glove2word2vec
 import re
 from gensim.models.keyedvectors import KeyedVectors as kv
@@ -33,6 +34,7 @@ class SearchEngine:
         self.n_of_results = n_of_results  # how many results the search engine is supposed to output
         self.combine = combine  # later to be implemented as choice between combination operations
         self.phondict = cmudict.dict()  # CMU Pronouncing Dictionary
+        self.phon_buck = json.loads(open('./data/pronunciation.json', encoding = 'utf-8').read()) #Combined pronouncing dictionary (CMU + Buckeye)
         self.lemmatizer = WordNetLemmatizer()
         self.best_result = "no result" # Best word. big word. punny word.
 
@@ -76,13 +78,15 @@ class SearchEngine:
         if create_bin == 'y':
             self.word_vectors.save_word2vec_format(os.path.join('data', 'word2vec.' + vectorfile[:-4] + '.bin'), binary=True)
 
-    def get_phon_list(self, word, max_dist, ortho=None, rhyme=None):
+    def get_phon_list(self, word, max_dist, ortho=None, buckeye=None, rhyme=None):
         """Returns a list of phonetically similar words to word with max levenshtein distance of max_dist. If ortho is not
         None, the function will instead return a list of orthographically similar words."""
 
         if not ortho and not rhyme:  # Default case: Use CMU dict
 
             iterlist = self.phondict  # The list being iterated over is thus the CMU dict
+            if buckeye:
+                iterlist = self.phon_buck
 
             try:
                 phon_rep = iterlist[word][0]  # CMU dict returns a list of pronunciations, thus [0]
@@ -91,6 +95,7 @@ class SearchEngine:
                 print("Word not found in data bank!")
 
         elif ortho:  # If orthographic comparison is turned on, iterate over the CMU dict's keys instead
+            
             iterlist = self.phondict.keys()  # which are simply orthographic words
 
         if not rhyme:  # If rhyme is turned on, skip the searching of the CMU dict
@@ -98,6 +103,7 @@ class SearchEngine:
             for x in iterlist:
 
                 if not ortho:
+                    
                     pron_x = iterlist[x][0]
 
                     if pron_x == phon_rep:  # If the pronunciation of x is the same as word, it shouldn't be added to
@@ -110,7 +116,7 @@ class SearchEngine:
 
                 if lvdist <= max_dist:  # Add x from CMU dict to results, if its edit_distance to word is < max_dist
                     results.append((x, lvdist))
-
+            results.sort(key=lambda x: x[0])
             results.sort(key=lambda x: x[1])    # Sort the results by edit_distance
             return [x[0] for x in results[:self.d_of_comparisons]]
 
@@ -138,7 +144,6 @@ class SearchEngine:
                 print('Lemmatized Phonetic list:', lemmatize_list(self.lemmatizer, phonlist))
 
             for x in range(len(phonlist)):  # If a word is both in asslist and phonlist initialize its value with its place x in phonlist
-
                 word = re.sub(r'\'', r'', phonlist[x])  # Get rid of single quotes as they don't affect pronunciation
 
                 if phonlist[x] in asslist or self.lemmatizer.lemmatize(word) in asslist:  # Also check for the lemmatized version of word -> more likely to be found in asslist
@@ -147,8 +152,9 @@ class SearchEngine:
                     resdict[phonlist[x]] = 100000000 + x
 
             for y in range(len(asslist)):  # Now, for combining both lists, go the other way and check starting from asslist
-
+               # print(asslist[y], y)
                 if asslist[y] in phonlist:  # If a word in its out-of-the-box form is found in phonlist, combine the scores
+                    #print([asslist[y]], resdict[asslist[y]], y)
                     resdict[asslist[y]] = fn_combo(resdict[asslist[y]], y)
 
                 elif asslist[y] in lemmatized_phonlist:  # If a word was not found in phonlist by default, try a lemmatized phonlist
@@ -175,20 +181,25 @@ class SearchEngine:
 
         return reslist[:self.n_of_results]
 
-    def execute_query(self, soundslike, association, ortho, rhyme, verbose=False):
+    def execute_query(self, soundslike, association, ortho, buckeye, rhyme, verbose=False):
         """Method responsible for the execution of the main query. All of the other parts flow together in this."""
-
+    
         try:
             ass_list = [x[0] for x in
                         self.word_vectors.most_similar(positive=[association], topn=self.d_of_comparisons)]
         except KeyError:
             return "Word %s not found in data bank." % association
 
-        phon_list = self.get_phon_list(soundslike, MAX_EDIT_DISTANCE, ortho, rhyme)
+        phon_list = self.get_phon_list(soundslike, MAX_EDIT_DISTANCE, ortho, buckeye, rhyme)
         if verbose:
             print('Associations:\n', ass_list)
             print('Phonetically similar:\n', phon_list)
-
+        #print('~~~')
+        #print(ass_list)
+        #print('~~~')
+        #print(phon_list)
+        #print('~~~')
+        #print(ass_list)
         result = self.combines(ass_list, phon_list)
         self.best_result = result[0][0]
         soundslike_lemma = self.lemmatizer.lemmatize(soundslike)
