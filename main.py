@@ -46,7 +46,6 @@ if __name__ == "__main__":
 
             sounds_like = query[0]
             topic = query[1]
-            print(cmd_args.buckeye)
             print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.buckeye, cmd_args.rhyme, cmd_args.verbose))
             print("Puns: (•_•)  ( •_•)>⌐■-■  (⌐■_■)")
 
