@@ -83,7 +83,7 @@ class WordInsert():
                         if rerun:     # If this is is a recursive rerun, as called at the end of this function
                             phonrep1 = self.cmuextension[self.sounds_like]  # Load the representation as computed previously
                         else:       # If this is the first run, use g2p to transcribe and save it in cmuextension.
-                            phonrep1 = self.g2p_model.decode_word((self.sounds_like))
+                            phonrep1 = self.g2p_model.decode_word((self.sounds_like)).split()  # Split cause string
                             self.cmuextension[self.sounds_like] = phonrep1
                             if self.verbose:
                                 print(self.sounds_like, phonrep1)
@@ -93,7 +93,7 @@ class WordInsert():
                         if rerun:
                             phonrep2 = self.cmuextension[word]
                         else:
-                            phonrep2 = self.g2p_model.decode_word(word)
+                            phonrep2 = self.g2p_model.decode_word(word).split()  # Split cause g2p returns string
                             self.cmuextension[word] = phonrep2
                             if self.verbose:
                                 print(word, phonrep2)
@@ -110,9 +110,8 @@ class WordInsert():
             print("No similar words to replace with edit distance {} found. \
                 Increasing edit distance by 1".format(self.max_distance))
             self.max_distance += 1
-            self.insert_word(rerun=True)
             self.recursion = True
-            self.insert_word()
+            self.insert_word(rerun=True)
             return self.sentences
 
         elif not self.sentences:

@@ -1,12 +1,10 @@
 import os
+import re
 import sys
 
-import gensim.scripts.glove2word2vec
-import re
 from gensim.models.keyedvectors import KeyedVectors as kv
-import os
-
 from nltk.metrics.distance import edit_distance
+
 try:
     from nltk.corpus import cmudict
     from nltk.stem.wordnet import WordNetLemmatizer
@@ -123,10 +121,9 @@ class SearchEngine:
             except KeyError:
 
                 try:
-                    # TODO: Why do we not get here?
                     print("use g2p for: " + word)
-                    phon_rep = self.g2p.decode_word(word)
-
+                    phon_rep = self.g2p_model.decode_word(word).split() #  This needs to be split because g2p returns a
+                                                                        #  string
                 except Exception:
 
                     print("Word not found in data bank!")

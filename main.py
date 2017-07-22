@@ -10,7 +10,7 @@ from g2p_seq2seq import g2p
 # Get file path to g2p model
 script_path = os.path.abspath(__file__) # i.e. /path/to/dir/word_guesser.py
 script_dir = os.path.split(script_path)[0] #i.e. /path/to/dir/
-rel_path_to_cmudict_model = "../g2p-seq2seq-master/g2p-seq2seq-cmudict"
+rel_path_to_cmudict_model = "g2p-seq2seq-master/g2p-seq2seq-cmudict"
 abs_path_model = os.path.join(script_dir, rel_path_to_cmudict_model)
 
 if __name__ == "__main__":
