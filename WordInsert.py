@@ -7,7 +7,6 @@ Created on Thu May 25 19:55:45 2017
 import argparse
 import string
 import os
-import g2pwrapper as g2p
 from nltk.metrics.distance import edit_distance
 try:
     from nltk.corpus import cmudict
@@ -18,8 +17,6 @@ try:
     import pronouncing
 except ImportError:
     print("Use: pip install pronouncing")
-
-
 
 # Get file paths to function words.
 script_path = os.path.abspath(__file__) # i.e. /path/to/dir/WordInsert.py
@@ -36,7 +33,7 @@ with open(abs_file_path_function_words, 'r', encoding="utf-8") as f:
 # Implement word in sentence
 class WordInsert():
 
-    def __init__(self, sounds_like, corpus, verbose=False, max_distance=2, use_function_words=False):
+    def __init__(self, sounds_like, corpus, g2p_model, verbose=False, max_distance=2, use_function_words=False):
         """
 
         :param sounds_like:
@@ -51,8 +48,8 @@ class WordInsert():
         self.sentences = []
         self.use_function_words = use_function_words
         self.cmudict = cmudict.dict()
-        self.g2p = g2p.G2PWrapper('cmudict-model6', g2p.PATH_G2P)
         self.cmuextension = {}
+        self.g2p_model = g2p_model
 
     def insert_word(self, ortho=False, rerun=False):
         for line in self.corpus:
@@ -68,7 +65,7 @@ class WordInsert():
                         if rerun:     # If this is is a recursive rerun, as called at the end of this function
                             phonrep1 = self.cmuextension[self.sounds_like]  # Load the representation as computed previously
                         else:       # If this is the first run, use g2p to transcribe and save it in cmuextension.
-                            phonrep1 = self.g2p.transcribeWord(self.sounds_like)
+                            phonrep1 = self.g2p_model.decode_word((self.sounds_like))
                             self.cmuextension[self.sounds_like] = phonrep1
                             if self.verbose:
                                 print(self.sounds_like, phonrep1)
@@ -78,7 +75,7 @@ class WordInsert():
                         if rerun:
                             phonrep2 = self.cmuextension[word]
                         else:
-                            phonrep2 = self.g2p.transcribeWord(word)
+                            phonrep2 = self.g2p_model.decode_word(word)
                             self.cmuextension[word] = phonrep2
                             if self.verbose:
                                 print(word, phonrep2)

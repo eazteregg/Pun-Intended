@@ -4,7 +4,6 @@ import gensim.scripts.glove2word2vec
 import re
 from gensim.models.keyedvectors import KeyedVectors as kv
 import os
-import g2pwrapper as g2p
 
 from nltk.metrics.distance import edit_distance
 try:
@@ -30,15 +29,16 @@ class SearchEngine:
 
     """This is the class that will handle all of the operations and queries and such"""
 
-    def __init__(self, d_of_comparisons, vectorfile, combine, n_of_results=5, forcebin=True):
+    def __init__(self, d_of_comparisons, vectorfile, combine, g2p_model, n_of_results=5, forcebin=True):
 
         self.d_of_comparisons = d_of_comparisons  # max dimensionality of the two lists
         self.n_of_results = n_of_results  # how many results the search engine is supposed to output
         self.combine = combine  # later to be implemented as choice between combination operations
-        self.g2p = g2p.G2PWrapper('cmudict-model6', g2p.PATH_G2P)
         self.phondict = cmudict.dict()  # CMU Pronouncing Dictionary
         self.lemmatizer = WordNetLemmatizer()
         self.best_result = "no result" # Best word. big word. punny word.
+
+        self.g2p_model = g2p_model
 
         # If vector file in gloVe format, transform it into word2vec and provide option to store it as binary
 
@@ -93,7 +93,9 @@ class SearchEngine:
             except KeyError:
 
                 try:
-                    phon_rep = self.g2p.transcribeWord(word)
+                    # TODO: Why do we not get here?
+                    print("use g2p for: " + word)
+                    phon_rep = self.g2p.decode_word(word)
 
                 except Exception:
 

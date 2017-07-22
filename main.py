@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 import sys
 import argparse
+import os
 from FindRelatedSentences import FindRelatedSentences
 from WordInsert import WordInsert
 from SearchEngine import SearchEngine
+from g2p_seq2seq import g2p
+
+# Get file path to g2p model
+script_path = os.path.abspath(__file__) # i.e. /path/to/dir/word_guesser.py
+script_dir = os.path.split(script_path)[0] #i.e. /path/to/dir/
+rel_path_to_cmudict_model = "../g2p-seq2seq-master/g2p-seq2seq-cmudict"
+abs_path_model = os.path.join(script_dir, rel_path_to_cmudict_model)
 
 if __name__ == "__main__":
 
@@ -20,8 +28,11 @@ if __name__ == "__main__":
     parser.add_argument('--func', action="store_true", help="Consider function words for replacement.")
     cmd_args = parser.parse_args()
 
+    g2p_model = g2p.G2PModel(abs_path_model)
+    g2p_model.load_decode_model()
+
     print("Hello and welcome to the pun aid!")
-    se = SearchEngine(1000, cmd_args.vecs, cmd_args.combo)
+    se = SearchEngine(1000, cmd_args.vecs, cmd_args.combo, g2p_model)
     model = se.word_vectors
 
     if cmd_args.ortho and cmd_args.rhyme:
@@ -51,6 +62,6 @@ if __name__ == "__main__":
 
             frs = FindRelatedSentences(topic, model, cmd_args.verbose, max_results=300, expl=cmd_args.expl)
             new_corpus = frs.filter_sentences_by_topic()
-            wi = WordInsert(se.best_result, new_corpus, True, max_distance=1)
+            wi = WordInsert(se.best_result, new_corpus, g2p_model, True, max_distance=1)
             print(wi.insert_word())
 
