@@ -18,6 +18,7 @@ if __name__ == "__main__":
     parser.add_argument('--means', type=str, help="Specify 'meaning' word")
     parser.add_argument('--verbose', action="store_true", help="Print additional debugging info")
     parser.add_argument('--func', action="store_true", help="Consider function words for replacement.")
+    parser.add_argument('--joke', action="store_true", help="Results are jokes.")
     cmd_args = parser.parse_args()
 
     print("Hello and welcome to the pun aid!")
@@ -51,6 +52,6 @@ if __name__ == "__main__":
 
             frs = FindRelatedSentences(topic, model, cmd_args.verbose, max_results=300, expl=cmd_args.expl)
             new_corpus = frs.filter_sentences_by_topic()
-            wi = WordInsert(se.best_result, new_corpus, True, max_distance=1)
-            print(wi.insert_word())
-
+            wi = WordInsert(se.best_result, new_corpus, True, max_distance=1, joke=cmd_args.joke)
+            for s in wi.insert_word():
+                print(s)

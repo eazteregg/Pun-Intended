@@ -11,9 +11,6 @@ path_to_this_file = os.path.abspath(__file__)  # i.e. /path/to/dir/implement_bas
 script_dir = os.path.split(path_to_this_file)[0]  # C:.../Pun-Intended/
 rel_path = "data/idiom_corpus.txt"
 abs_corpus_path = os.path.join(script_dir, rel_path)  # C:.../Pun-Intended/data
-bin_file_name = "word2vec.glove.6B.100d.bin"
-
-abs_binary_path = os.path.join(script_dir, "data", bin_file_name)
 
 with open(abs_corpus_path, 'r') as corpus:
     corpus = [line.strip().lower() for line in corpus if not line.startswith('#')]
