@@ -17,10 +17,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description='Helps you build puns and lyrics')
-    parser.add_argument('--vecs', type=str, default="glove.6B.100d.txt", help="Path to Glove/word2vec file (default: %(default)s)")
+    parser.add_argument('--vecs', type=str, default="glove.6B.50d.txt", help="Path to Glove/word2vec file (default: %(default)s)")
     parser.add_argument('--combo', type=str, default="sum", help="Combination method {sum|prod|inter} (default: %(default)s)")
     parser.add_argument('--rhyme', action="store_true", help="Restrict phonological matches to rhymes")
     parser.add_argument('--ortho', action="store_true", help="Use orthographic matches instead of phonological ones")
+    parser.add_argument('--buckeye', action="store_true", help="Use Buckeye Prononciation Dictionary")
     parser.add_argument('--expl', action="store_true", help="Also use explanations of idioms")
     parser.add_argument('--sound_like', type=str, help="Specify 'sounds-like' word")
     parser.add_argument('--means', type=str, help="Specify 'meaning' word")
@@ -57,8 +58,7 @@ if __name__ == "__main__":
 
             sounds_like = query[0]
             topic = query[1]
-
-            print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.rhyme, cmd_args.verbose))
+            print(se.execute_query(sounds_like, topic, cmd_args.ortho, cmd_args.buckeye, cmd_args.rhyme, cmd_args.verbose))
             print("Puns: (•_•)  ( •_•)>⌐■-■  (⌐■_■)")
 
             frs = FindRelatedSentences(topic, model, cmd_args.verbose, max_results=300, expl=cmd_args.expl)
