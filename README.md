@@ -14,6 +14,7 @@ Make sure that the follow dependencies are installed before trying to run Pun-In
 1. Install the dependencies mentioned above
 2. Clone the git to your local machine with `git clone https://github.com/eazteregg/Pun-Intended`
 3. Download the vectors from the GloVe website ([direct download link](http://nlp.stanford.edu/data/glove.6B.zip)), export and add `glove.6B.50d.txt` or `glove.6B.100d.txt` to the data folder. Alternatively, you can use the word embeddings from the [Conceptnet Numberbatch](https://blog.conceptnet.io/2016/05/25/conceptnet-numberbatch-a-new-name-for-the-best-word-embeddings-you-can-download/) project ([direct download link](http://conceptnet.s3.amazonaws.com/downloads/2017/numberbatch/numberbatch-en-17.04b.txt.gz)) and add `numberbatch-en[version].txt` to the data folder. 
+4. Install the [Sequence-to-Sequence G2P toolkit](https://github.com/cmusphinx/g2p-seq2seq) by following the intructions given in teh repository. Please note that it requires a specific version of Tensorflow.
 
 ### Command line Run options
 - '--vecs' choose which glove text to build vectors from, default="glove.6B.100d.txt"
