@@ -29,27 +29,21 @@ Make sure that the follow dependencies are installed before trying to run Pun-In
 
 -----------------------------------------------------------------------------------------------------------
 
-Notes on the grapheme2phoneme fork:
+### Notes on the grapheme2phoneme fork:
 
-NEEDS PYTHON2.7!
+This fork uses g2p-seq2seq which can be found on https://github.com/cmusphinx/g2p-seq2seq
 
-Sequitur G2P is a trainable data-driven grapheme-to-phoneme converter and may be used in this context to come up with phonetic representations for
-strings not found in CMUdict. G2P is a Python 2 application, therefore, I tried wrapping it in Python 3 using subprocess.run(). To be frank, I
-feel like it's more of a hack than a proper implementation, but it works for the time being.
+Getting g2p-seq2seq to work:
 
-1.
-Download the latest (2016-04-25) Sequitur G2P from http://www-i6.informatik.rwth-aachen.de/web/Software/g2p.html
-You will be needing Swig in order to build and run G2P, so download that as well using apt-get install.
+1. Download tensorflow 1.0.0 (older/newer won't work) for your platform; wheels can be found on https://pypi.python.org/pypi/tensorflow/1.0.0
 
-2.
-Follow the instructions found in the README file to build G2P
-The g2pwrapper expects G2P to be located in the home folder, but you may change this in the source code with the PATH_G2P variable
+2. Install g2p-seq2seq by following the instructions in the README on their github page.
+3. Download the cmudict model, link is located on their github page.
+4. Move the folder g2p_seq2seq into the project folder of this project.
+5. Move the cmudict model into the data folder inside the project folder.
+6. Be happy that this tedious set up has come to an end.
 
-G2P uses models trained on already transcribed words, like CMUdict. In order to train the model found in the data folder,
-I split the CMU dict in half, taking only the odd numbered lines for training purposes and the even numbered ones for testing.
-I went through 6 iterations of training, look at the G2P README to find out how. There might be further improvements to be had by continuing this, but
-currently the model achieves a string accuracy of 57.74% and a symbol accuracy of 89.49%.
-
+This now allows the program to transcribe words it has never seen before, thus enabeling pun embeddings via the --joke option.
 
 ### Main.py
 - takes command line arguments and parses them. 
