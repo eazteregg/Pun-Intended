@@ -1,5 +1,5 @@
 # Pun-Intended
-This software aids in pun generation, and other word-plays, like song lyrics and poetry.
+This software aids in pun generation by producing the PUNchline of jokes.  We built this system to take a query of two words under the criteria of "sounds like x but has to do with y."  After this 'punny' word is determined, it is then embedded in an English idiomatic expression to produce a full phrase to be used in a pun.  Have fun playing with parameters to see what puns you can create!  
 
 ### Dependencies
 This project is written in python 3.5
