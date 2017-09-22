@@ -17,7 +17,7 @@ Make sure that the follow dependencies are installed before trying to run Pun-In
 
 ### Command line Run options
 - '--vecs' choose which glove text to build vectors from, default="glove.6B.100d.txt"
-- '--combo' Choocse which method to compute distance default="sum", help="Combination method {sum|prod|inter}
+- '--combo' Choose which method to compute distance default="sum", help="Combination method {sum|prod|inter}
 - '--rhyme' Restricts to the phonological matches that rhyme to the input, default=true
 - '--buckeye', Uses the [Buckeye Pronunciation Dictionary](https://github.com/jonsafari/buckeye_dict) along with CMU Dictionary.
 - '--ortho' Uses orthographic matches instead of phonological ones, default=true
@@ -26,4 +26,3 @@ Make sure that the follow dependencies are installed before trying to run Pun-In
 - '--means', help="Specify 'meaning' word")
 - '--verbose', action="store_true", help="Print additional debugging info")
 - '--func', action="store_true", help="Consider function words for replacement.")
-
